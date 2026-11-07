@@ -1,9 +1,9 @@
 # Главный скрипт: загрузка диалогов -> оценка ИИ -> проверка -> расчёт балла -> сохранение.
 #
 # Запуск:
-#   python evaluate.py --set dev     -> results/dev/results.json
-#   python evaluate.py --set prod    -> results/prod/results.json
-#   python evaluate.py --set demo    -> демо-данные для сайта (без ключа, из кэша)
+#   python3 evaluate.py --set dev     -> results/dev/results.json
+#   python3 evaluate.py --set prod    -> results/prod/results.json
+#   python3 evaluate.py --set demo    -> демо-данные для сайта (без ключа, из кэша)
 
 import argparse
 import json
@@ -512,7 +512,7 @@ def main():
     expected = EXPECTED_COUNT.get(args.set)
     if expected and not args.limit and len(results) != expected:
         print("ВНИМАНИЕ: ожидалось %d записей, получилось %d!" % (expected, len(results)))
-    print("Проверка файла: python validate.py", results_path)
+    print("Проверка файла: python3 validate.py", results_path)
 
 
 if __name__ == "__main__":

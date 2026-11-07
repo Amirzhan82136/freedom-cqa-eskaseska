@@ -1,5 +1,5 @@
 # Простые проверки формулы и нумерации реплик.
-# Запуск: python test_scoring.py
+# Запуск: python3 test_scoring.py
 
 from scoring import calc_score
 from evaluate import normalize_dialog, format_transcript, check_answer

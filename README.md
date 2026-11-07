@@ -20,7 +20,7 @@
 ## Установка (один раз)
 
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 cp .env.example .env
 ```
 
@@ -31,18 +31,18 @@ cp .env.example .env
 ## Запуск
 
 ```bash
-python test_scoring.py               # тесты формулы (пример из гайда даёт 85.38)
-python evaluate.py --set dev         # оценить DEV -> results/dev/results.json
-python validate.py results/dev/results.json
+python3 test_scoring.py               # тесты формулы (пример из гайда даёт 85.38)
+python3 evaluate.py --set dev         # оценить DEV -> results/dev/results.json
+python3 validate.py results/dev/results.json
 ```
 
-Для пробы можно оценить только первые 3 диалога: `python evaluate.py --set dev --limit 3`.
+Для пробы можно оценить только первые 3 диалога: `python3 evaluate.py --set dev --limit 3`.
 
 **PROD (за час до конца), по порядку:**
 
 ```bash
-python evaluate.py --set prod
-python validate.py results/prod/results.json
+python3 evaluate.py --set prod
+python3 validate.py results/prod/results.json
 git add results/prod/results.json
 git commit -m "PROD результаты"
 git push
@@ -53,8 +53,8 @@ git push
 ## Сайт
 
 ```bash
-python evaluate.py --set demo        # демо-данные, ключ не нужен
-python -m http.server 8000
+python3 evaluate.py --set demo        # демо-данные, ключ не нужен
+python3 -m http.server 8000
 ```
 
 Откройте <http://localhost:8000/web/>. Интернет не нужен. Набор данных (DEV, PROD, DEMO) выбирается слева внизу.

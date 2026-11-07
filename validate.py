@@ -1,5 +1,5 @@
 # Проверка results.json перед отправкой.
-# Запуск: python validate.py results/dev/results.json
+# Запуск: python3 validate.py results/dev/results.json
 # Если есть ошибки, скрипт завершается с кодом 1.
 
 import json
@@ -120,7 +120,7 @@ def validate(path):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Использование: python validate.py results/dev/results.json")
+        print("Использование: python3 validate.py results/dev/results.json")
         sys.exit(1)
     errors, warnings = validate(sys.argv[1])
     for w in warnings:

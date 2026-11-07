@@ -150,8 +150,8 @@ async function start() {
   const names = Object.keys(available);
   if (names.length === 0) {
     document.getElementById("app").innerHTML =
-      '<div class="card error-box"><h2>Нет данных</h2>Сначала запустите <b>python evaluate.py --set demo</b> ' +
-      "(или dev), затем откройте сайт через <b>python -m http.server</b>.</div>";
+      '<div class="card error-box"><h2>Нет данных</h2>Сначала запустите <b>python3 evaluate.py --set demo</b> ' +
+      "(или dev), затем откройте сайт через <b>python3 -m http.server</b>.</div>";
     return;
   }
   select.innerHTML = names.map((n) =>
@@ -547,7 +547,7 @@ function setupPlayer(d) {
 
   if (audio) {
     // Скачиваем файл целиком и даём плееру ссылку на него в памяти.
-    // Так перемотка работает даже на простом python -m http.server.
+    // Так перемотка работает даже на простом python3 -m http.server.
     fetch(d.audio)
       .then((response) => response.blob())
       .then((blob) => { audio.src = URL.createObjectURL(blob); })
