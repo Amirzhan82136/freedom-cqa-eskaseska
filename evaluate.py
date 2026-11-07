@@ -33,8 +33,12 @@ TEAM_NAME = "EskaSeska"
 # Выбирается в .env строкой CQA_PROVIDER=gemini или CQA_PROVIDER=claude.
 PROVIDER = os.getenv("CQA_PROVIDER", "gemini").lower()
 KEY_NAMES = {"gemini": "GEMINI_API_KEY", "claude": "ANTHROPIC_API_KEY"}
-DEFAULT_MODELS = {"gemini": "gemini-flash-latest", "claude": "claude-opus-5-5"}
-MODEL = os.getenv("CQA_MODEL") or DEFAULT_MODELS[PROVIDER]
+# У бесплатного Gemini лимит около 20 запросов в день НА КАЖДУЮ модель. Поэтому моделей несколько:
+# когда у первой кончился дневной лимит, берём следующую. В results.json попадут все использованные.
+DEFAULT_MODELS = {"gemini": "gemini-3.6-flash,gemini-3.7-flash,gemini-3.5-flash,gemini-3.5-flash-lite", "claude": "claude-opus-5-5"}
+MODELS = [m.strip() for m in (os.getenv("CQA_MODEL") or DEFAULT_MODELS[PROVIDER]).split(",") if m.strip()]
+MODEL = MODELS[0]
+exhausted_models = set()   # модели, у которых на сегодня кончился лимит
 WORKERS = 2 if PROVIDER == "gemini" else 4   # у бесплатного Gemini лимит запросов в минуту
 MAX_ATTEMPTS = 4          # сколько раз спрашиваем модель, если ответ плохой
 
@@ -382,19 +386,31 @@ def ask_gemini(dialog, criteria):
     if gemini_client is None:
         gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-    response = gemini_client.models.generate_content(
-        model=MODEL,
-        contents="Транскрипт диалога:\n\n" + format_transcript(dialog),
-        config=types.GenerateContentConfig(
-            system_instruction=build_system_prompt(criteria),
-            temperature=0,                          # одинаковый ответ на одинаковый диалог
-            response_mime_type="application/json",  # ответ строго в JSON по схеме
-            response_json_schema=build_answer_schema(criteria),
-        ),
-    )
-    if not response.text:
-        raise RuntimeError("Пустой ответ модели.")
-    return json.loads(response.text), response.model_version or MODEL
+    for model in MODELS:
+        if model in exhausted_models:
+            continue
+        try:
+            response = gemini_client.models.generate_content(
+                model=model,
+                contents="Транскрипт диалога:\n\n" + format_transcript(dialog),
+                config=types.GenerateContentConfig(
+                    system_instruction=build_system_prompt(criteria),
+                    temperature=0,                          # одинаковый ответ на одинаковый диалог
+                    response_mime_type="application/json",  # ответ строго в JSON по схеме
+                    response_json_schema=build_answer_schema(criteria),
+                ),
+            )
+        except Exception as error:
+            if "PerDay" in str(error) or "per day" in str(error):
+                exhausted_models.add(model)    # дневной лимит этой модели кончился - пробуем следующую
+                print("  Дневной лимит модели %s исчерпан, переключаюсь на следующую" % model)
+                continue
+            raise
+        if not response.text:
+            raise RuntimeError("Пустой ответ модели.")
+        return json.loads(response.text), response.model_version or model
+    raise RuntimeError("Дневной лимит бесплатного Gemini исчерпан на всех моделях (%s). "
+                       "Запустите оценку завтра или подключите платный ключ." % ", ".join(MODELS))
 
 
 def ask_claude(dialog, criteria):
@@ -516,6 +532,8 @@ def evaluate_dialog(dialog, cache=None, cache_path=None, criteria=CRITERIA):
             last_error = "Ошибка запроса к модели: %s" % error
         with lock:
             print("  [%s] попытка %d не удалась: %s" % (dialog_id, attempt, last_error[:200]))
+        if "Дневной лимит" in last_error:
+            break                       # ждать бесполезно: лимит обнулится только завтра
         if any(code in last_error for code in ["429", "RESOURCE_EXHAUSTED", "503", "UNAVAILABLE"]):
             time.sleep(30 * attempt)    # лимит бесплатного тарифа или модель перегружена - ждём подольше
         else:
