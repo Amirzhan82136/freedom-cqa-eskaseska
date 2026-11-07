@@ -18,6 +18,8 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 import anthropic
+from google import genai
+from google.genai import types
 import requests
 from dotenv import load_dotenv
 
@@ -27,8 +29,23 @@ from scoring import calc_score
 load_dotenv()  # читаем ключи из файла .env
 
 TEAM_NAME = "EskaSeska"
-MODEL = os.getenv("CQA_MODEL", "claude-opus-5-5")
-MAX_ATTEMPTS = 3          # сколько раз спрашиваем модель, если ответ плохой
+# Какой ИИ использовать: gemini (бесплатный ключ Google) или claude (платный ключ Anthropic).
+# Выбирается в .env строкой CQA_PROVIDER=gemini или CQA_PROVIDER=claude.
+PROVIDER = os.getenv("CQA_PROVIDER", "gemini").lower()
+KEY_NAMES = {"gemini": "GEMINI_API_KEY", "claude": "ANTHROPIC_API_KEY"}
+DEFAULT_MODELS = {"gemini": "gemini-flash-latest", "claude": "claude-opus-5-5"}
+MODEL = os.getenv("CQA_MODEL") or DEFAULT_MODELS[PROVIDER]
+WORKERS = 2 if PROVIDER == "gemini" else 4   # у бесплатного Gemini лимит запросов в минуту
+MAX_ATTEMPTS = 4          # сколько раз спрашиваем модель, если ответ плохой
+
+
+def has_key():
+    """Есть ли в .env ключ для выбранного ИИ."""
+    return bool(os.getenv(KEY_NAMES[PROVIDER]))
+
+
+def no_key_message():
+    return "Нет ключа модели: впишите %s в файл .env и перезапустите программу" % KEY_NAMES[PROVIDER]
 EXPECTED_COUNT = {"dev": 65, "prod": 10}
 
 ROLE_NAMES = {"client": "Клиент", "operator": "Оператор", "bot": "Бот", "event": "Событие"}
@@ -338,16 +355,45 @@ def build_answer_schema(criteria=CRITERIA):
     }
 
 
-client = None
+claude_client = None
+gemini_client = None
 
 
 def ask_model(dialog, criteria=CRITERIA):
-    """Отправить диалог модели и получить ответ-словарь. Возвращает (ответ, имя модели)."""
-    global client
-    if client is None:
-        client = anthropic.Anthropic()   # ключ берётся из ANTHROPIC_API_KEY в .env
+    """Отправить диалог ИИ и получить ответ-словарь. Возвращает (ответ, имя модели)."""
+    if PROVIDER == "gemini":
+        return ask_gemini(dialog, criteria)
+    return ask_claude(dialog, criteria)
 
-    response = client.beta.messages.create(
+
+def ask_gemini(dialog, criteria):
+    """Google Gemini. Ключ берётся из GEMINI_API_KEY в .env."""
+    global gemini_client
+    if gemini_client is None:
+        gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+    response = gemini_client.models.generate_content(
+        model=MODEL,
+        contents="Транскрипт диалога:\n\n" + format_transcript(dialog),
+        config=types.GenerateContentConfig(
+            system_instruction=build_system_prompt(criteria),
+            temperature=0,                          # одинаковый ответ на одинаковый диалог
+            response_mime_type="application/json",  # ответ строго в JSON по схеме
+            response_json_schema=build_answer_schema(criteria),
+        ),
+    )
+    if not response.text:
+        raise RuntimeError("Пустой ответ модели.")
+    return json.loads(response.text), response.model_version or MODEL
+
+
+def ask_claude(dialog, criteria):
+    """Anthropic Claude. Ключ берётся из ANTHROPIC_API_KEY в .env."""
+    global claude_client
+    if claude_client is None:
+        claude_client = anthropic.Anthropic()
+
+    response = claude_client.beta.messages.create(
         model=MODEL,
         max_tokens=16000,
         system=build_system_prompt(criteria),
@@ -449,8 +495,11 @@ def evaluate_dialog(dialog, cache=None, cache_path=None, criteria=CRITERIA):
         except Exception as error:
             last_error = "Ошибка запроса к модели: %s" % error
         with lock:
-            print("  [%s] попытка %d не удалась: %s" % (dialog_id, attempt, last_error))
-        time.sleep(2 * attempt)
+            print("  [%s] попытка %d не удалась: %s" % (dialog_id, attempt, last_error[:200]))
+        if "429" in last_error or "RESOURCE_EXHAUSTED" in last_error:
+            time.sleep(30 * attempt)    # упёрлись в лимит бесплатного тарифа - ждём подольше
+        else:
+            time.sleep(2 * attempt)
     return error_result(dialog_id, last_error), None
 
 
@@ -540,12 +589,12 @@ def check_input(set_name):
     print("\nПроблем найдено:", problems)
 
 
-def run_set(set_name, limit=0, workers=4, on_progress=None):
+def run_set(set_name, limit=0, workers=WORKERS, on_progress=None):
     """Оценить весь набор: загрузка -> ИИ -> проверка -> балл -> results.json и данные для сайта.
     on_progress(готово, всего, ошибок) вызывается после каждого диалога (для полосы прогресса на сайте).
     Возвращает словарь с итогами."""
-    if not set_name.startswith("demo") and not os.getenv("ANTHROPIC_API_KEY"):
-        raise SystemExit("Нет ключа модели: впишите ANTHROPIC_API_KEY в файл .env (см. .env.example)")
+    if not set_name.startswith("demo") and not has_key():
+        raise SystemExit(no_key_message())
 
     started = time.time()
     dialogs = load_dialogs(set_name)
@@ -635,7 +684,7 @@ def main():
     parser = argparse.ArgumentParser(description="Оценка диалогов операторов")
     parser.add_argument("--set", required=True, choices=["dev", "prod", "demo", "demo-prod"])
     parser.add_argument("--limit", type=int, default=0, help="оценить только первые N диалогов (для пробы)")
-    parser.add_argument("--workers", type=int, default=4, help="сколько диалогов оценивать одновременно")
+    parser.add_argument("--workers", type=int, default=WORKERS, help="сколько диалогов оценивать одновременно")
     parser.add_argument("--check", action="store_true",
                         help="только прочитать диалоги и показать, как они поняты (без ИИ и без ключа)")
     args = parser.parse_args()

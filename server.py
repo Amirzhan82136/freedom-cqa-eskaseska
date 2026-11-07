@@ -62,8 +62,8 @@ def parse_pasted(text):
 
 def evaluate_live(body):
     """Оценить один диалог по рабочему чек-листу и добавить его в набор «Живая оценка»."""
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        raise ValueError("Нет ключа модели: впишите ANTHROPIC_API_KEY в файл .env и перезапустите сервер")
+    if not evaluate.has_key():
+        raise ValueError(evaluate.no_key_message())
     criteria = load_active_checklist()
 
     if body.get("conversation_id"):
@@ -129,7 +129,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Location", "/web/")
             self.end_headers()
         elif path == "/api/status":
-            self.send_json({"server": True, "has_key": bool(os.getenv("ANTHROPIC_API_KEY")),
+            self.send_json({"server": True, "has_key": evaluate.has_key(),
                             "has_api": bool(os.getenv("CQA_API_URL")), "model": evaluate.MODEL, "job": job})
         elif path == "/api/checklist":
             self.send_json({"criteria": load_active_checklist(), "official": CRITERIA})
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     port = free_port()
     url = "http://localhost:%d/web/" % port
     print("Сайт работает:", url)
-    print("Ключ модели:", "есть" if os.getenv("ANTHROPIC_API_KEY") else "НЕТ (живая оценка не заработает)")
+    print("ИИ:", evaluate.PROVIDER, evaluate.MODEL, "- ключ", "есть" if evaluate.has_key() else "НЕТ (живая оценка не заработает)")
     print("Чтобы остановить, нажмите Ctrl + C или закройте окно.")
     threading.Timer(1, lambda: webbrowser.open(url)).start()
     # 127.0.0.1 - сайт доступен только с этого компьютера

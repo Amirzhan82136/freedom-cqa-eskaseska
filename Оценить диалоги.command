@@ -1,6 +1,6 @@
 #!/bin/bash
 # Двойной клик: оценить набор DEV или PROD, проверить файл и сделать коммит.
-# Перед запуском: ключ ANTHROPIC_API_KEY в .env и данные в data/dev/ или data/prod/
+# Перед запуском: ключ ИИ (GEMINI_API_KEY или ANTHROPIC_API_KEY) в .env и данные в data/dev/ или data/prod/
 # (или адрес API организаторов CQA_API_URL в .env).
 
 cd "$(dirname "$0")"
