@@ -14,6 +14,7 @@ import re
 import shutil
 import threading
 import time
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 import anthropic
@@ -52,38 +53,29 @@ def first_of(data, keys, default=None):
 
 
 def pick_list(data):
-    """API может вернуть список сразу или внутри {"items": [...]}."""
+    """Достать список диалогов. API организаторов отвечает так:
+    {"isSuccess": true, "data": {"records": [...]}}. Поддерживаем и просто список."""
     if isinstance(data, list):
         return data
-    return first_of(data, ["items", "conversations", "dialogs", "data", "results"], [data])
+    inner = first_of(data, ["records", "items", "conversations", "dialogs", "data", "results"])
+    if inner is None:
+        return [data]          # в файле один диалог
+    return pick_list(inner)
 
 
 def fetch_from_api(api_url, set_name):
     """Скачать диалоги из API организаторов.
-    TODO: сверить адреса запросов с документацией API, когда её выдадут.
-    Сейчас: GET {CQA_API_URL}/conversations?set=dev, затем при необходимости
-    GET {CQA_API_URL}/conversations/{id} для полного транскрипта."""
-    headers = {}
-    token = os.getenv("CQA_API_TOKEN")
-    if token:
-        headers["Authorization"] = "Bearer " + token
-
-    response = requests.get(api_url.rstrip("/") + "/conversations",
-                            params={"set": set_name}, headers=headers, timeout=60)
+    CQA_API_URL - полная ссылка из чата организаторов. Набор выбирается параметром
+    group_id: DEV или PROD (в ссылке подставляем нужный)."""
+    url = re.sub(r"group_id=[^&]*", "group_id=" + set_name.upper(), api_url)
+    if "group_id=" not in url:
+        url += "&group_id=" + set_name.upper()
+    response = requests.get(url, timeout=120)
     response.raise_for_status()
-    items = pick_list(response.json())
-
-    dialogs = []
-    for item in items:
-        # если в списке нет транскрипта, догружаем диалог отдельно
-        if not first_of(item, ["transcript", "turns", "messages", "utterances", "segments"]):
-            dialog_id = first_of(item, ["conversation_id", "id"])
-            one = requests.get(api_url.rstrip("/") + "/conversations/" + str(dialog_id),
-                               headers=headers, timeout=60)
-            one.raise_for_status()
-            item = one.json()
-        dialogs.append(item)
-    return dialogs
+    data = response.json()
+    if isinstance(data, dict) and data.get("isSuccess") is False:
+        raise SystemExit("API организаторов вернуло ошибку: %s" % data.get("error"))
+    return pick_list(data)
 
 
 def read_csv_file(path):
@@ -130,6 +122,16 @@ def to_seconds(value):
     return None
 
 
+def parse_moment(value):
+    """'2026-11-03T15:49:13.19+00:00' -> дата и время. Иначе None."""
+    if isinstance(value, str) and "T" in value:
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    return None
+
+
 def normalize_role(role):
     """Привести роль к одной из: client, operator, bot, event."""
     role = str(role).lower()
@@ -160,18 +162,32 @@ def normalize_dialog(raw):
         turns_raw = first_of(turns_raw, ["turns", "messages", "segments", "utterances"], [])
 
     turns = []
+    first_moment = None    # время первой реплики звонка (для времени вида 2026-11-03T15:49:13)
     for index, t in enumerate(turns_raw):
         if isinstance(t, str):
             t = {"text": t}
         time_value = first_of(t, ["start", "start_time", "startTime", "begin", "timestamp", "time", "ts"])
+        start = to_seconds(time_value)
+        moment = parse_moment(time_value)
+        if moment:
+            # у звонков время - дата и час; переводим в секунды от начала звонка
+            if first_moment is None:
+                first_moment = moment
+            start = (moment - first_moment).total_seconds()
         turns.append({
             "n": index + 1,
             "role": normalize_role(first_of(t, ["role", "speaker", "author", "sender", "from", "participant", "type"], "")),
             "text": str(first_of(t, ["text", "content", "message", "body", "utterance"], "")),
-            "start": to_seconds(time_value),
+            "start": start,
             "end": to_seconds(first_of(t, ["end", "end_time", "endTime", "stop"])),
             "time_label": time_value if isinstance(time_value, str) else None,
         })
+
+    # если нет времени конца реплики, считаем, что она длится до начала следующей
+    for i, turn in enumerate(turns):
+        if turn["end"] is None and turn["start"] is not None:
+            next_starts = [t["start"] for t in turns[i + 1:] if t["start"] is not None]
+            turn["end"] = next_starts[0] if next_starts else turn["start"] + 3
 
     audio = first_of(raw, ["audio_url", "audio", "audio_file", "recording_url", "record_url", "audio_path"])
     channel_text = str(first_of(raw, ["channel", "type", "source", "kind"], "")).lower()
@@ -200,7 +216,7 @@ def load_dialogs(set_name):
     api_url = os.getenv("CQA_API_URL")
     folder = os.path.join("data", set_name)
     if api_url and not set_name.startswith("demo"):
-        print("Скачиваю диалоги из API:", api_url)
+        print("Скачиваю диалоги из API организаторов (набор %s)" % set_name.upper())
         raw = fetch_from_api(api_url, set_name)
         os.makedirs(folder, exist_ok=True)
         with open(os.path.join(folder, "api_dump.json"), "w", encoding="utf-8") as f:
@@ -456,6 +472,13 @@ def prepare_audio(dialog):
                     headers["Authorization"] = "Bearer " + os.getenv("CQA_API_TOKEN")
                 response = requests.get(source, headers=headers, timeout=120)
                 response.raise_for_status()
+                if "text/html" in response.headers.get("Content-Type", ""):
+                    # организаторы отдают страницу с плеером; настоящий mp3 - в <source src="...">
+                    found = re.search(r'<source[^>]+src="([^"]+)"', response.text)
+                    if not found:
+                        raise RuntimeError("в странице нет ссылки на аудио")
+                    response = requests.get(found.group(1).replace("&amp;", "&"), timeout=300)
+                    response.raise_for_status()
                 with open(target, "wb") as f:
                     f.write(response.content)
             else:
