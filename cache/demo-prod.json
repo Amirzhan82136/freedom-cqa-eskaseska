@@ -1,0 +1,637 @@
+{
+  "sample-chat-ru-01": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровалась и представилась.",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "discovery": {
+        "rationale": "Уточнила рынок и срок вложения.",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "identification": {
+        "rationale": "Общий вопрос не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "consultation": {
+        "rationale": "Подобрала вариант под срок и показала, где найти и сравнить доходность.",
+        "value": 20,
+        "evidence_turns": [
+          4
+        ]
+      },
+      "empathy": {
+        "rationale": "Тёплый, заботливый тон.",
+        "value": true,
+        "evidence_turns": [
+          2,
+          6
+        ]
+      },
+      "dialogue": {
+        "rationale": "Быстро, понятно, грамотно.",
+        "value": 10,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "closure": {
+        "rationale": "Предложила писать ещё и попрощалась.",
+        "value": true,
+        "evidence_turns": [
+          6
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-chat-ru-02": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          4
+        ]
+      },
+      "discovery": {
+        "rationale": "Уточнил, какой документ нужен.",
+        "value": true,
+        "evidence_turns": [
+          4
+        ]
+      },
+      "identification": {
+        "rationale": "Запросил ИИН и кодовое слово до заказа справки.",
+        "value": true,
+        "evidence_turns": [
+          6
+        ]
+      },
+      "consultation": {
+        "rationale": "Оформил справку, назвал срок и канал получения.",
+        "value": 20,
+        "evidence_turns": [
+          8
+        ]
+      },
+      "empathy": {
+        "rationale": "Вежливый тон.",
+        "value": true,
+        "evidence_turns": [
+          4,
+          9
+        ]
+      },
+      "dialogue": {
+        "rationale": "Долгие паузы: 4 минуты на первый ответ и по 3 минуты дальше.",
+        "value": 4,
+        "evidence_turns": [
+          4,
+          6,
+          8
+        ]
+      },
+      "closure": {
+        "rationale": "Спросил о других вопросах и попрощался.",
+        "value": true,
+        "evidence_turns": [
+          9,
+          11
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          4,
+          6,
+          8
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-chat-kk-03": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "discovery": {
+        "rationale": "Клиент сразу ясно задал вопрос.",
+        "value": null,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "identification": {
+        "rationale": "Общий вопрос о выводе не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "consultation": {
+        "rationale": "Объяснил, где вывести деньги, и назвал срок.",
+        "value": 20,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "empathy": {
+        "rationale": "Извинился и сразу перешёл на язык клиента.",
+        "value": true,
+        "evidence_turns": [
+          4
+        ]
+      },
+      "dialogue": {
+        "rationale": "Сначала ответил на русском, хотя клиент писал на казахском.",
+        "value": 7,
+        "evidence_turns": [
+          2,
+          3
+        ]
+      },
+      "closure": {
+        "rationale": "Попрощался.",
+        "value": true,
+        "evidence_turns": [
+          6
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-chat-en-04": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "discovery": {
+        "rationale": "Клиент сразу ясно спросил про комиссию на опционы.",
+        "value": null,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "identification": {
+        "rationale": "Общий вопрос не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "consultation": {
+        "rationale": "Сначала назвал неверную комиссию, исправился только после замечания клиента.",
+        "value": 10,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "empathy": {
+        "rationale": "Признал ошибку и извинился.",
+        "value": true,
+        "evidence_turns": [
+          4
+        ]
+      },
+      "dialogue": {
+        "rationale": "Отвечает быстро, но первый ответ был неточным.",
+        "value": 7,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "closure": {
+        "rationale": "Не попрощался и не спросил о других вопросах.",
+        "value": false,
+        "evidence_turns": [
+          5
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-chat-ru-05": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровалась и представилась.",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "discovery": {
+        "rationale": "Не выяснила устройство, версию и что именно происходит.",
+        "value": false,
+        "evidence_turns": [
+          4
+        ]
+      },
+      "identification": {
+        "rationale": "Техническая проблема входа не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "consultation": {
+        "rationale": "Совет не помог, проблему не решила, срочную продажу акций не предложила сделать иначе.",
+        "value": 0,
+        "evidence_turns": [
+          4,
+          6
+        ]
+      },
+      "empathy": {
+        "rationale": "Проигнорировала срочность и раздражение клиента.",
+        "value": false,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "dialogue": {
+        "rationale": "Пауза 5 минут, затем чат закрыт без ответа.",
+        "value": 0,
+        "evidence_turns": [
+          4,
+          6
+        ]
+      },
+      "closure": {
+        "rationale": "Закрыла чат без ответа и прощания.",
+        "value": false,
+        "evidence_turns": [
+          6
+        ]
+      },
+      "critical": {
+        "rationale": "Сервис очень плохой, но грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          4,
+          6
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-call-ru-06": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Клиент сразу ясно описал проблему.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "identification": {
+        "rationale": "Проверил ИИН и кодовое слово до сброса пароля.",
+        "value": true,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "consultation": {
+        "rationale": "Сбросил пароль и предупредил о безопасности кода.",
+        "value": 20,
+        "evidence_turns": [
+          5
+        ]
+      },
+      "empathy": {
+        "rationale": "Заботливый тон, «сейчас поможем».",
+        "value": true,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "dialogue": {
+        "rationale": "Быстро и чётко.",
+        "value": 10,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "closure": {
+        "rationale": "Спросил о других вопросах и попрощался.",
+        "value": true,
+        "evidence_turns": [
+          7
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          5
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-call-kk-07": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Клиент сразу ясно сказал, что хочет депозит.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "identification": {
+        "rationale": "Вопрос о депозите не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "consultation": {
+        "rationale": "Правильно объяснил, что депозит в банке, и дал номер.",
+        "value": 20,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "empathy": {
+        "rationale": "Вежливый тон.",
+        "value": true,
+        "evidence_turns": [
+          1,
+          5
+        ]
+      },
+      "dialogue": {
+        "rationale": "Разговор короткий и чёткий.",
+        "value": 10,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "closure": {
+        "rationale": "Спросил о других вопросах и попрощался.",
+        "value": true,
+        "evidence_turns": [
+          5
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          3
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-call-en-08": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровалась и представилась.",
+        "value": true,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Клиент сразу ясно спросил о статусе заявки.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "identification": {
+        "rationale": "Назвала детали заявки и баланс только по имени, без проверки личности.",
+        "value": false,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "consultation": {
+        "rationale": "Статус заявки сообщила точно.",
+        "value": 20,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "empathy": {
+        "rationale": "Вежливый тон.",
+        "value": true,
+        "evidence_turns": [
+          1,
+          5
+        ]
+      },
+      "dialogue": {
+        "rationale": "Чётко и быстро.",
+        "value": 10,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "closure": {
+        "rationale": "Попрощалась.",
+        "value": true,
+        "evidence_turns": [
+          5
+        ]
+      },
+      "critical": {
+        "rationale": "Раскрыла баланс и сделки без идентификации клиента.",
+        "value": true,
+        "evidence_turns": [
+          3
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-call-ru-09": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Уточнил, какие акции продал клиент и сколько держал.",
+        "value": true,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "identification": {
+        "rationale": "Общий вопрос о налоге не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "consultation": {
+        "rationale": "Объяснил правила налога и где взять справку.",
+        "value": 20,
+        "evidence_turns": [
+          5
+        ]
+      },
+      "empathy": {
+        "rationale": "Перебил клиента и пытался отправить его в налоговую.",
+        "value": false,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "dialogue": {
+        "rationale": "Перебивает, разговорная речь («Так, подождите», «Ага»).",
+        "value": 4,
+        "evidence_turns": [
+          3,
+          7
+        ]
+      },
+      "closure": {
+        "rationale": "Попрощался.",
+        "value": true,
+        "evidence_turns": [
+          7
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "sample-call-ru-10": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровалась и представилась.",
+        "value": true,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Клиент ошибся номером, выяснять нечего.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "identification": {
+        "rationale": "Идентификация не нужна.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "consultation": {
+        "rationale": "Консультации не было: клиент ошибся номером.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "empathy": {
+        "rationale": "Вежливо и дружелюбно ответила.",
+        "value": true,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "dialogue": {
+        "rationale": "Коротко и корректно.",
+        "value": 10,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "closure": {
+        "rationale": "Клиент сам завершил звонок.",
+        "value": null,
+        "evidence_turns": [
+          4
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          3
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  }
+}

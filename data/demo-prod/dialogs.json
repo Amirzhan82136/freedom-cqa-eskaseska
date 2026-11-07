@@ -1,0 +1,415 @@
+[
+  {
+    "conversation_id": "sample-chat-ru-01",
+    "channel": "chat",
+    "language": "ru",
+    "messages": [
+      {
+        "role": "client",
+        "text": "Добрый вечер! Хочу купить облигации, но не понимаю, с чего начать",
+        "timestamp": "2026-10-15T10:00:00"
+      },
+      {
+        "role": "operator",
+        "text": "Добрый вечер! Меня зовут Асель, Freedom Broker. Подскажите, вас интересуют облигации Казахстана или зарубежные? И на какой срок планируете вложение?",
+        "timestamp": "2026-10-15T10:00:35"
+      },
+      {
+        "role": "client",
+        "text": "Казахстанские, примерно на год",
+        "timestamp": "2026-10-15T10:01:05"
+      },
+      {
+        "role": "operator",
+        "text": "Тогда подойдут государственные облигации или облигации крупных компаний на KASE. В приложении откройте «Рынки → Облигации», включите фильтр «KASE» и срок погашения до 1 года. Там видна доходность к погашению.",
+        "timestamp": "2026-10-15T10:02:05"
+      },
+      {
+        "role": "client",
+        "text": "Отлично, нашла. Спасибо!",
+        "timestamp": "2026-10-15T10:02:45"
+      },
+      {
+        "role": "operator",
+        "text": "Рада помочь! Если появятся вопросы, пишите. Хорошего вечера!",
+        "timestamp": "2026-10-15T10:03:00"
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-chat-ru-02",
+    "channel": "chat",
+    "language": "ru",
+    "messages": [
+      {
+        "role": "bot",
+        "text": "Здравствуйте! Выберите тему: 1 — счёт, 2 — документы, 3 — другое",
+        "timestamp": "2026-10-15T10:00:00"
+      },
+      {
+        "role": "client",
+        "text": "2",
+        "timestamp": "2026-10-15T10:00:10"
+      },
+      {
+        "role": "system",
+        "text": "Диалог передан оператору",
+        "timestamp": "2026-10-15T10:00:15"
+      },
+      {
+        "role": "operator",
+        "text": "Здравствуйте, меня зовут Ильяс. Какой документ вам нужен?",
+        "timestamp": "2026-10-15T10:04:15"
+      },
+      {
+        "role": "client",
+        "text": "Справка о доходах для налоговой за прошлый год",
+        "timestamp": "2026-10-15T10:04:35"
+      },
+      {
+        "role": "operator",
+        "text": "Для этого нужно подтвердить личность. Напишите, пожалуйста, ИИН и кодовое слово",
+        "timestamp": "2026-10-15T10:07:55"
+      },
+      {
+        "role": "client",
+        "text": "890101300111, кодовое слово «весна»",
+        "timestamp": "2026-10-15T10:08:25"
+      },
+      {
+        "role": "operator",
+        "text": "Спасибо. Справку сформирую, она придёт на email из профиля в течение 2 рабочих дней.",
+        "timestamp": "2026-10-15T10:11:25"
+      },
+      {
+        "role": "operator",
+        "text": "Есть ли ещё вопросы?",
+        "timestamp": "2026-10-15T10:11:45"
+      },
+      {
+        "role": "client",
+        "text": "Нет",
+        "timestamp": "2026-10-15T10:11:55"
+      },
+      {
+        "role": "operator",
+        "text": "Всего доброго!",
+        "timestamp": "2026-10-15T10:12:05"
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-chat-kk-03",
+    "channel": "chat",
+    "language": "kk",
+    "messages": [
+      {
+        "role": "client",
+        "text": "Сәлеметсіз бе! Брокерлік шоттан банк шотына ақша аударуға бола ма?",
+        "timestamp": "2026-10-15T10:00:00"
+      },
+      {
+        "role": "operator",
+        "text": "Здравствуйте! Меня зовут Олжас. Да, можно: в приложении «Вывод средств» → выберите счёт в банке.",
+        "timestamp": "2026-10-15T10:00:40"
+      },
+      {
+        "role": "client",
+        "text": "Қазақша жаза аласыз ба?",
+        "timestamp": "2026-10-15T10:01:10"
+      },
+      {
+        "role": "operator",
+        "text": "Әрине, кешіріңіз! Қосымшада «Қаражатты шығару» бөлімін ашып, банк шотын таңдаңыз. Ақша бір жұмыс күні ішінде түседі.",
+        "timestamp": "2026-10-15T10:01:45"
+      },
+      {
+        "role": "client",
+        "text": "Рахмет",
+        "timestamp": "2026-10-15T10:02:05"
+      },
+      {
+        "role": "operator",
+        "text": "Оқасы жоқ, сау болыңыз!",
+        "timestamp": "2026-10-15T10:02:15"
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-chat-en-04",
+    "channel": "chat",
+    "language": "en",
+    "messages": [
+      {
+        "role": "client",
+        "text": "Hello! What is the commission for trading US options?",
+        "timestamp": "2026-10-15T10:00:00"
+      },
+      {
+        "role": "operator",
+        "text": "Hi, I'm Arman from Freedom Broker. The commission is 0.1% of the trade amount.",
+        "timestamp": "2026-10-15T10:00:40"
+      },
+      {
+        "role": "client",
+        "text": "Are you sure? I read it is per contract",
+        "timestamp": "2026-10-15T10:01:10"
+      },
+      {
+        "role": "operator",
+        "text": "Sorry, you are right. For options it is 0.65 USD per contract. My mistake.",
+        "timestamp": "2026-10-15T10:02:40"
+      },
+      {
+        "role": "client",
+        "text": "Ok, thanks",
+        "timestamp": "2026-10-15T10:03:00"
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-chat-ru-05",
+    "channel": "chat",
+    "language": "ru",
+    "messages": [
+      {
+        "role": "client",
+        "text": "Здравствуйте! Почему у меня приложение вылетает при входе уже второй день???",
+        "timestamp": "2026-10-15T10:00:00"
+      },
+      {
+        "role": "operator",
+        "text": "Здравствуйте, Freedom Broker, Дана.",
+        "timestamp": "2026-10-15T10:01:00"
+      },
+      {
+        "role": "client",
+        "text": "Так что мне делать? Мне нужно продать акции",
+        "timestamp": "2026-10-15T10:01:30"
+      },
+      {
+        "role": "operator",
+        "text": "Обновите приложение.",
+        "timestamp": "2026-10-15T10:06:30"
+      },
+      {
+        "role": "client",
+        "text": "Уже обновил, не помогает!",
+        "timestamp": "2026-10-15T10:06:50"
+      },
+      {
+        "role": "system",
+        "text": "Оператор закрыл чат",
+        "timestamp": "2026-10-15T10:10:50"
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-call-ru-06",
+    "channel": "call",
+    "language": "ru",
+    "audio_url": "data/demo-prod/audio/sample-call-ru-06.m4a",
+    "transcript": [
+      {
+        "speaker": "operator",
+        "text": "Freedom Broker, здравствуйте! Меня зовут Святослав. Чем могу помочь?",
+        "start": 0.5,
+        "end": 6.24
+      },
+      {
+        "speaker": "client",
+        "text": "Здравствуйте. Я забыла пароль от приложения.",
+        "start": 6.84,
+        "end": 12.12
+      },
+      {
+        "speaker": "operator",
+        "text": "Сейчас поможем. Назовите, пожалуйста, ваш ИИН и кодовое слово.",
+        "start": 12.72,
+        "end": 19.46
+      },
+      {
+        "speaker": "client",
+        "text": "ИИН девятьсот пять, ноль семь, ноль девять. Кодовое слово — солнце.",
+        "start": 20.06,
+        "end": 27.07
+      },
+      {
+        "speaker": "operator",
+        "text": "Спасибо, всё совпало. Я отправил ссылку для сброса пароля в SMS. Пожалуйста, никому не сообщайте код из сообщения, даже сотрудникам банка.",
+        "start": 27.67,
+        "end": 39.76
+      },
+      {
+        "speaker": "client",
+        "text": "Пришло, всё получилось. Спасибо!",
+        "start": 40.36,
+        "end": 44.85
+      },
+      {
+        "speaker": "operator",
+        "text": "Отлично! Могу ещё чем-то помочь? Хорошего дня!",
+        "start": 45.45,
+        "end": 51.76
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-call-kk-07",
+    "channel": "call",
+    "language": "kk",
+    "audio_url": "data/demo-prod/audio/sample-call-kk-07.m4a",
+    "transcript": [
+      {
+        "speaker": "operator",
+        "text": "Freedom Broker, сәлеметсіз бе! Мен Дәулет. Тыңдап тұрмын.",
+        "start": 0.5,
+        "end": 5.59
+      },
+      {
+        "speaker": "client",
+        "text": "Сәлеметсіз бе. Депозит ашқым келеді, пайызы қанша?",
+        "start": 6.19,
+        "end": 11.23
+      },
+      {
+        "speaker": "operator",
+        "text": "Депозиттер Freedom Bank-те ашылады. Біз брокерлік компаниямыз. Мен сізге банктің нөмірін айтайын: жеті жүз сегіз. Олар толық кеңес береді.",
+        "start": 11.83,
+        "end": 23.23
+      },
+      {
+        "speaker": "client",
+        "text": "Жақсы, рахмет.",
+        "start": 23.83,
+        "end": 25.96
+      },
+      {
+        "speaker": "operator",
+        "text": "Оқасы жоқ! Басқа сұрақтарыңыз бар ма? Сау болыңыз!",
+        "start": 26.56,
+        "end": 32.11
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-call-en-08",
+    "channel": "call",
+    "language": "en",
+    "audio_url": "data/demo-prod/audio/sample-call-en-08.m4a",
+    "transcript": [
+      {
+        "speaker": "operator",
+        "text": "Freedom Broker, this is Jenny. How can I help you?",
+        "start": 0.5,
+        "end": 5.18
+      },
+      {
+        "speaker": "client",
+        "text": "Hi, I placed an order to buy Apple yesterday. Can you check its status? My name is John Smith.",
+        "start": 5.78,
+        "end": 11.64
+      },
+      {
+        "speaker": "operator",
+        "text": "Sure. John Smith, yes, I see it. Your order for twenty Apple shares at one hundred ninety dollars was executed, and your balance now is twelve thousand dollars.",
+        "start": 12.24,
+        "end": 24.26
+      },
+      {
+        "speaker": "client",
+        "text": "Great, thanks.",
+        "start": 24.86,
+        "end": 26.73
+      },
+      {
+        "speaker": "operator",
+        "text": "You're welcome. Goodbye!",
+        "start": 27.33,
+        "end": 30.55
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-call-ru-09",
+    "channel": "call",
+    "language": "ru",
+    "audio_url": "data/demo-prod/audio/sample-call-ru-09.m4a",
+    "transcript": [
+      {
+        "speaker": "operator",
+        "text": "Freedom Broker, Арсен, здравствуйте.",
+        "start": 0.5,
+        "end": 4.08
+      },
+      {
+        "speaker": "client",
+        "text": "Здравствуйте. У меня вопрос по налогам, я продал акции и хотел узнать...",
+        "start": 4.68,
+        "end": 11.23
+      },
+      {
+        "speaker": "operator",
+        "text": "Так, подождите, по налогам — это вам надо в налоговую. Хотя ладно, что продали?",
+        "start": 11.83,
+        "end": 19.12
+      },
+      {
+        "speaker": "client",
+        "text": "Акции американской компании, держал их больше года.",
+        "start": 19.72,
+        "end": 24.24
+      },
+      {
+        "speaker": "operator",
+        "text": "Если держали больше трёх лет и они на бирже, налога нет. Больше года — надо платить десять процентов с прибыли. Справку возьмёте в приложении.",
+        "start": 24.84,
+        "end": 36.52
+      },
+      {
+        "speaker": "client",
+        "text": "Понятно, спасибо.",
+        "start": 37.12,
+        "end": 39.67
+      },
+      {
+        "speaker": "operator",
+        "text": "Ага, всего хорошего.",
+        "start": 40.27,
+        "end": 43.0
+      }
+    ]
+  },
+  {
+    "conversation_id": "sample-call-ru-10",
+    "channel": "call",
+    "language": "ru",
+    "audio_url": "data/demo-prod/audio/sample-call-ru-10.m4a",
+    "transcript": [
+      {
+        "speaker": "operator",
+        "text": "Freedom Broker, добрый день! Меня зовут Камила. Чем могу помочь?",
+        "start": 0.5,
+        "end": 7.84
+      },
+      {
+        "speaker": "client",
+        "text": "Ой, извините, я не туда попал.",
+        "start": 8.44,
+        "end": 12.02
+      },
+      {
+        "speaker": "operator",
+        "text": "Ничего страшного! Если будут вопросы по инвестициям — звоните. Хорошего дня!",
+        "start": 12.62,
+        "end": 20.68
+      },
+      {
+        "speaker": "system",
+        "text": "Клиент завершил звонок",
+        "start": 21.28,
+        "end": 21.28
+      }
+    ]
+  }
+]

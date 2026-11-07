@@ -1,16 +1,15 @@
 {
   "demo-chat-ru-01": {
-    "model": "демо-разметка вручную (без ИИ)",
     "answer": {
       "contact": {
-        "rationale": "Оператор поздоровался, назвал имя и компанию.",
+        "rationale": "Поздоровался, назвал имя и компанию.",
         "value": true,
         "evidence_turns": [
           4
         ]
       },
       "discovery": {
-        "rationale": "Клиент сразу чётко сформулировал вопрос о комиссии, уточнять было нечего.",
+        "rationale": "Клиент сразу чётко сформулировал вопрос о комиссии.",
         "value": null,
         "evidence_turns": [
           2
@@ -32,7 +31,7 @@
         ]
       },
       "empathy": {
-        "rationale": "Признал, что для небольших сумм комиссия ощутима, и дал совет.",
+        "rationale": "Признал, что для небольших сумм комиссия ощутима, дал совет.",
         "value": true,
         "evidence_turns": [
           7
@@ -64,13 +63,13 @@
           9
         ]
       }
-    }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
   },
   "demo-chat-ru-02": {
-    "model": "демо-разметка вручную (без ИИ)",
     "answer": {
       "contact": {
-        "rationale": "Оператор поздоровался, но не представился.",
+        "rationale": "Поздоровался, но не представился.",
         "value": false,
         "evidence_turns": [
           2
@@ -130,10 +129,10 @@
           4
         ]
       }
-    }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
   },
   "demo-chat-kk-03": {
-    "model": "демо-разметка вручную (без ИИ)",
     "answer": {
       "contact": {
         "rationale": "Поздоровался на казахском, назвал имя и компанию.",
@@ -195,10 +194,10 @@
           6
         ]
       }
-    }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
   },
   "demo-chat-en-04": {
-    "model": "демо-разметка вручную (без ИИ)",
     "answer": {
       "contact": {
         "rationale": "Написал только «hello» без представления и через 4 минуты.",
@@ -262,10 +261,140 @@
           6
         ]
       }
-    }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "demo-chat-ru-07": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "discovery": {
+        "rationale": "Уточнил, выбрал ли клиент конкретное IPO.",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "identification": {
+        "rationale": "Общий вопрос об IPO не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "consultation": {
+        "rationale": "Объяснил, где найти IPO и про блокировку суммы, но не сказал о рисках и аллокации подробнее.",
+        "value": 15,
+        "evidence_turns": [
+          4,
+          6
+        ]
+      },
+      "empathy": {
+        "rationale": "Вежливый, внимательный тон.",
+        "value": true,
+        "evidence_turns": [
+          2,
+          6
+        ]
+      },
+      "dialogue": {
+        "rationale": "Ответы правильные, но паузы по 3 минуты.",
+        "value": 7,
+        "evidence_turns": [
+          4,
+          6
+        ]
+      },
+      "closure": {
+        "rationale": "Предложил дальнейшую помощь.",
+        "value": true,
+        "evidence_turns": [
+          7
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          2,
+          4,
+          6
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "demo-chat-kk-08": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "discovery": {
+        "rationale": "Клиент сразу ясно сказал, что хочет сменить номер.",
+        "value": null,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "identification": {
+        "rationale": "Запросил ИИН и кодовое слово до консультации по смене номера.",
+        "value": true,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "consultation": {
+        "rationale": "Подтвердил данные и объяснил, где и как сменить номер.",
+        "value": 20,
+        "evidence_turns": [
+          4
+        ]
+      },
+      "empathy": {
+        "rationale": "Доброжелательный тон, «помогу».",
+        "value": true,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "dialogue": {
+        "rationale": "Быстро и грамотно.",
+        "value": 10,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "closure": {
+        "rationale": "Не попрощался и не спросил, остались ли вопросы.",
+        "value": false,
+        "evidence_turns": [
+          5
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          2,
+          4
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
   },
   "demo-call-ru-05": {
-    "model": "демо-разметка вручную (без ИИ)",
     "answer": {
       "contact": {
         "rationale": "Назвал компанию, поздоровался и представился.",
@@ -328,10 +457,10 @@
           8
         ]
       }
-    }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
   },
   "demo-call-ru-06": {
-    "model": "демо-разметка вручную (без ИИ)",
     "answer": {
       "contact": {
         "rationale": "Ответил «Алло, слушаю» без приветствия и представления.",
@@ -396,6 +525,265 @@
           7
         ]
       }
-    }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "demo-call-kk-09": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался, назвал компанию и имя.",
+        "value": true,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Уточнил, о каких акциях речь: казахстанских или американских.",
+        "value": true,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "identification": {
+        "rationale": "Общий вопрос о налоге не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "consultation": {
+        "rationale": "Объяснил удержание налога, но не уточнил, от чего зависит ставка (форма W-8BEN).",
+        "value": 15,
+        "evidence_turns": [
+          5
+        ]
+      },
+      "empathy": {
+        "rationale": "Доброжелательный, спокойный тон.",
+        "value": true,
+        "evidence_turns": [
+          1,
+          7
+        ]
+      },
+      "dialogue": {
+        "rationale": "Разговор вёл чётко и грамотно.",
+        "value": 10,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "closure": {
+        "rationale": "Спросил о других вопросах и попрощался.",
+        "value": true,
+        "evidence_turns": [
+          7
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          5
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "demo-call-en-10": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался, но не назвал ни своё имя, ни компанию.",
+        "value": false,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Уточнил, есть ли у клиента ИИН.",
+        "value": true,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "identification": {
+        "rationale": "Вопрос об открытии счёта не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "consultation": {
+        "rationale": "Перечислил документы, где получить ИИН и как открыть счёт.",
+        "value": 20,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "empathy": {
+        "rationale": "Дружелюбный тон, «No problem».",
+        "value": true,
+        "evidence_turns": [
+          5,
+          7
+        ]
+      },
+      "dialogue": {
+        "rationale": "Разговор вёл уверенно и понятно.",
+        "value": 10,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "closure": {
+        "rationale": "Предложил помощь и попрощался.",
+        "value": true,
+        "evidence_turns": [
+          7
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "demo-call-ru-11": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался и представился.",
+        "value": true,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Выяснил, о какой заявке речь, и нашёл причину задержки.",
+        "value": true,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "identification": {
+        "rationale": "Запросил ИИН и кодовое слово до разговора о счёте.",
+        "value": true,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "consultation": {
+        "rationale": "Нашёл причину и передал заявку, но не объяснил клиенту, может ли он сам исправить реквизиты.",
+        "value": 15,
+        "evidence_turns": [
+          5
+        ]
+      },
+      "empathy": {
+        "rationale": "Признал неудобство клиента: «понимаю, это очень неприятно».",
+        "value": true,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "dialogue": {
+        "rationale": "Спокойно и чётко вёл разговор с недовольным клиентом.",
+        "value": 10,
+        "evidence_turns": [
+          3,
+          5,
+          7
+        ]
+      },
+      "closure": {
+        "rationale": "Сказал, как клиент узнает результат, и попрощался.",
+        "value": true,
+        "evidence_turns": [
+          7
+        ]
+      },
+      "critical": {
+        "rationale": "Грубых нарушений нет.",
+        "value": false,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
+  },
+  "demo-call-ru-12": {
+    "answer": {
+      "contact": {
+        "rationale": "Поздоровался, назвал компанию и имя.",
+        "value": true,
+        "evidence_turns": [
+          1
+        ]
+      },
+      "discovery": {
+        "rationale": "Не выяснил цели, срок и опыт клиента перед советом.",
+        "value": false,
+        "evidence_turns": [
+          3
+        ]
+      },
+      "identification": {
+        "rationale": "Общий вопрос не требует идентификации.",
+        "value": null,
+        "evidence_turns": [
+          2
+        ]
+      },
+      "consultation": {
+        "rationale": "Дал недопустимый совет с гарантией доходности.",
+        "value": 0,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "empathy": {
+        "rationale": "Тон дружелюбный.",
+        "value": true,
+        "evidence_turns": [
+          1,
+          7
+        ]
+      },
+      "dialogue": {
+        "rationale": "Разговор живой, но поверхностный.",
+        "value": 7,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "closure": {
+        "rationale": "Попрощался.",
+        "value": true,
+        "evidence_turns": [
+          7
+        ]
+      },
+      "critical": {
+        "rationale": "Гарантировал доходность акций — грубое нарушение для брокера.",
+        "value": true,
+        "evidence_turns": [
+          3,
+          5
+        ]
+      }
+    },
+    "model": "демо-разметка вручную (без ИИ)"
   }
 }

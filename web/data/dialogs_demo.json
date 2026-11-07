@@ -108,7 +108,7 @@
           "text": "Здравствуйте! Я виртуальный помощник Freedom Broker. Опишите ваш вопрос.",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:00:00"
+          "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
@@ -116,7 +116,7 @@
           "text": "Какая комиссия за покупку американских акций через приложение?",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:00:20"
+          "time_label": "2026-10-15T10:00:20"
         },
         {
           "n": 3,
@@ -124,7 +124,7 @@
           "text": "Диалог передан оператору",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:00:25"
+          "time_label": "2026-10-15T10:00:25"
         },
         {
           "n": 4,
@@ -132,15 +132,15 @@
           "text": "Здравствуйте! Меня зовут Данияр, Freedom Broker. Сейчас подскажу.",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:00:55"
+          "time_label": "2026-10-15T10:00:55"
         },
         {
           "n": 5,
           "role": "operator",
-          "text": "Комиссия зависит от вашего тарифа. На тарифе «Стандарт» это 0,1% от суммы сделки, минимум 1,2 USD. Посмотреть свой тариф можно в приложении: Профиль → Тариф.",
+          "text": "Комиссия зависит от вашего тарифа. На тарифе «Стандарт» это 0,1% от суммы сделки, минимум 1,2 USD. Свой тариф можно посмотреть в приложении: Профиль → Тариф.",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:01:40"
+          "time_label": "2026-10-15T10:01:40"
         },
         {
           "n": 6,
@@ -148,15 +148,15 @@
           "text": "А если сумма маленькая, например 50 долларов?",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:02:10"
+          "time_label": "2026-10-15T10:02:10"
         },
         {
           "n": 7,
           "role": "operator",
-          "text": "Тогда сработает минимальная комиссия 1,2 USD, потому что 0,1% от 50 USD меньше минимума. Понимаю, что для небольших сумм это ощутимо, поэтому многие клиенты покупают реже, но крупнее.",
+          "text": "Тогда сработает минимальная комиссия 1,2 USD. Понимаю, что для небольших сумм это ощутимо, поэтому многие клиенты покупают реже, но крупнее.",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:02:50"
+          "time_label": "2026-10-15T10:02:50"
         },
         {
           "n": 8,
@@ -164,7 +164,7 @@
           "text": "Понятно, спасибо",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:03:10"
+          "time_label": "2026-10-15T10:03:10"
         },
         {
           "n": 9,
@@ -172,7 +172,7 @@
           "text": "Пожалуйста! Остались ли ещё вопросы? Хорошего дня!",
           "start": null,
           "end": null,
-          "time_label": "2026-10-10T10:03:25"
+          "time_label": "2026-10-15T10:03:25"
         }
       ],
       "result": {
@@ -182,7 +182,7 @@
           {
             "criterion_id": "contact",
             "value": true,
-            "rationale": "Оператор поздоровался, назвал имя и компанию.",
+            "rationale": "Поздоровался, назвал имя и компанию.",
             "evidence_turns": [
               4
             ]
@@ -190,7 +190,7 @@
           {
             "criterion_id": "discovery",
             "value": null,
-            "rationale": "Клиент сразу чётко сформулировал вопрос о комиссии, уточнять было нечего.",
+            "rationale": "Клиент сразу чётко сформулировал вопрос о комиссии.",
             "evidence_turns": [
               2
             ]
@@ -215,7 +215,7 @@
           {
             "criterion_id": "empathy",
             "value": true,
-            "rationale": "Признал, что для небольших сумм комиссия ощутима, и дал совет.",
+            "rationale": "Признал, что для небольших сумм комиссия ощутима, дал совет.",
             "evidence_turns": [
               7
             ]
@@ -268,7 +268,7 @@
           "text": "Добрый день, скажите сколько у меня денег на брокерском счёте? Номер договора 77-1043",
           "start": null,
           "end": null,
-          "time_label": "2026-10-11T10:00:00"
+          "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
@@ -276,7 +276,7 @@
           "text": "Добрый день. На счёте 77-1043 сейчас 4 850 USD и 120 акций Apple.",
           "start": null,
           "end": null,
-          "time_label": "2026-10-11T10:01:00"
+          "time_label": "2026-10-15T10:01:00"
         },
         {
           "n": 3,
@@ -284,7 +284,7 @@
           "text": "А почему так мало? Вчера было больше",
           "start": null,
           "end": null,
-          "time_label": "2026-10-11T10:01:30"
+          "time_label": "2026-10-15T10:01:30"
         },
         {
           "n": 4,
@@ -292,7 +292,7 @@
           "text": "Рынок упал, это не наша проблема.",
           "start": null,
           "end": null,
-          "time_label": "2026-10-11T10:03:00"
+          "time_label": "2026-10-15T10:03:00"
         },
         {
           "n": 5,
@@ -300,7 +300,7 @@
           "text": "Можно как-то повежливее?",
           "start": null,
           "end": null,
-          "time_label": "2026-10-11T10:03:20"
+          "time_label": "2026-10-15T10:03:20"
         },
         {
           "n": 6,
@@ -308,7 +308,7 @@
           "text": "Я ответил на ваш вопрос.",
           "start": null,
           "end": null,
-          "time_label": "2026-10-11T10:05:20"
+          "time_label": "2026-10-15T10:05:20"
         },
         {
           "n": 7,
@@ -316,7 +316,7 @@
           "text": "Клиент покинул чат",
           "start": null,
           "end": null,
-          "time_label": "2026-10-11T10:05:50"
+          "time_label": "2026-10-15T10:05:50"
         }
       ],
       "result": {
@@ -326,7 +326,7 @@
           {
             "criterion_id": "contact",
             "value": false,
-            "rationale": "Оператор поздоровался, но не представился.",
+            "rationale": "Поздоровался, но не представился.",
             "evidence_turns": [
               2
             ]
@@ -411,7 +411,7 @@
           "text": "Сәлеметсіз бе! Шотқа ақшаны қалай салуға болады?",
           "start": null,
           "end": null,
-          "time_label": "2026-10-12T10:00:00"
+          "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
@@ -419,7 +419,7 @@
           "text": "Сәлеметсіз бе! Мен Айгерім, Freedom Broker. Қандай тәсілмен салғыңыз келеді: банк картасымен бе, әлде аударыммен бе?",
           "start": null,
           "end": null,
-          "time_label": "2026-10-12T10:00:25"
+          "time_label": "2026-10-15T10:00:25"
         },
         {
           "n": 3,
@@ -427,7 +427,7 @@
           "text": "Картамен",
           "start": null,
           "end": null,
-          "time_label": "2026-10-12T10:00:40"
+          "time_label": "2026-10-15T10:00:40"
         },
         {
           "n": 4,
@@ -435,7 +435,7 @@
           "text": "Қосымшада «Шотты толтыру» бөліміне кіріп, «Карта» тәсілін таңдаңыз. Ақша әдетте бірнеше минут ішінде түседі. Комиссия жоқ.",
           "start": null,
           "end": null,
-          "time_label": "2026-10-12T10:01:15"
+          "time_label": "2026-10-15T10:01:15"
         },
         {
           "n": 5,
@@ -443,7 +443,7 @@
           "text": "Рахмет!",
           "start": null,
           "end": null,
-          "time_label": "2026-10-12T10:01:35"
+          "time_label": "2026-10-15T10:01:35"
         },
         {
           "n": 6,
@@ -451,7 +451,7 @@
           "text": "Оқасы жоқ! Тағы сұрақтарыңыз болса, жазыңыз. Сау болыңыз!",
           "start": null,
           "end": null,
-          "time_label": "2026-10-12T10:01:45"
+          "time_label": "2026-10-15T10:01:45"
         }
       ],
       "result": {
@@ -545,7 +545,7 @@
           "text": "Hi, I can't log in to the app, it says my password is wrong",
           "start": null,
           "end": null,
-          "time_label": "2026-10-13T10:00:00"
+          "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
@@ -553,7 +553,7 @@
           "text": "hello",
           "start": null,
           "end": null,
-          "time_label": "2026-10-13T10:04:00"
+          "time_label": "2026-10-15T10:04:00"
         },
         {
           "n": 3,
@@ -561,7 +561,7 @@
           "text": "Can you help me reset it?",
           "start": null,
           "end": null,
-          "time_label": "2026-10-13T10:04:30"
+          "time_label": "2026-10-15T10:04:30"
         },
         {
           "n": 4,
@@ -569,7 +569,7 @@
           "text": "please tell me the code from sms that you just received so i can reset it",
           "start": null,
           "end": null,
-          "time_label": "2026-10-13T10:07:50"
+          "time_label": "2026-10-15T10:07:50"
         },
         {
           "n": 5,
@@ -577,7 +577,7 @@
           "text": "Is that safe?",
           "start": null,
           "end": null,
-          "time_label": "2026-10-13T10:08:10"
+          "time_label": "2026-10-15T10:08:10"
         },
         {
           "n": 6,
@@ -585,7 +585,7 @@
           "text": "yes its fine just send it",
           "start": null,
           "end": null,
-          "time_label": "2026-10-13T10:10:40"
+          "time_label": "2026-10-15T10:10:40"
         },
         {
           "n": 7,
@@ -593,7 +593,7 @@
           "text": "I'll try the reset button myself, bye",
           "start": null,
           "end": null,
-          "time_label": "2026-10-13T10:11:20"
+          "time_label": "2026-10-15T10:11:20"
         }
       ],
       "result": {
@@ -678,6 +678,282 @@
       }
     },
     {
+      "conversation_id": "demo-chat-ru-07",
+      "channel": "chat",
+      "language": "ru",
+      "audio": null,
+      "turns": [
+        {
+          "n": 1,
+          "role": "client",
+          "text": "Здравствуйте, хочу поучаствовать в IPO. Как это сделать?",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:00:00"
+        },
+        {
+          "n": 2,
+          "role": "operator",
+          "text": "Здравствуйте! Меня зовут Тимур, Freedom Broker. Подскажите, вы уже выбрали конкретное IPO или хотите узнать, какие сейчас доступны?",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:00:50"
+        },
+        {
+          "n": 3,
+          "role": "client",
+          "text": "Хочу узнать, какие есть",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:01:20"
+        },
+        {
+          "n": 4,
+          "role": "operator",
+          "text": "Актуальные IPO есть в приложении в разделе «IPO». Там указаны даты сбора заявок и минимальная сумма участия. Заявку можно подать прямо там.",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:04:20"
+        },
+        {
+          "n": 5,
+          "role": "client",
+          "text": "А деньги сразу спишут?",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:04:45"
+        },
+        {
+          "n": 6,
+          "role": "operator",
+          "text": "Сумма заявки будет заблокирована на счету до распределения акций. Если акций дадут меньше, остаток разблокируется.",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:07:25"
+        },
+        {
+          "n": 7,
+          "role": "operator",
+          "text": "Ещё чем-то могу помочь?",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:07:45"
+        },
+        {
+          "n": 8,
+          "role": "client",
+          "text": "Нет, спасибо",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:08:00"
+        }
+      ],
+      "result": {
+        "conversation_id": "demo-chat-ru-07",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": true,
+            "rationale": "Поздоровался и представился.",
+            "evidence_turns": [
+              2
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": true,
+            "rationale": "Уточнил, выбрал ли клиент конкретное IPO.",
+            "evidence_turns": [
+              2
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": null,
+            "rationale": "Общий вопрос об IPO не требует идентификации.",
+            "evidence_turns": [
+              1
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 15,
+            "rationale": "Объяснил, где найти IPO и про блокировку суммы, но не сказал о рисках и аллокации подробнее.",
+            "evidence_turns": [
+              4,
+              6
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Вежливый, внимательный тон.",
+            "evidence_turns": [
+              2,
+              6
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 7,
+            "rationale": "Ответы правильные, но паузы по 3 минуты.",
+            "evidence_turns": [
+              4,
+              6
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": true,
+            "rationale": "Предложил дальнейшую помощь.",
+            "evidence_turns": [
+              7
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": false,
+            "rationale": "Грубых нарушений нет.",
+            "evidence_turns": [
+              2,
+              4,
+              6
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 88.13,
+          "critical_flag": false
+        }
+      }
+    },
+    {
+      "conversation_id": "demo-chat-kk-08",
+      "channel": "chat",
+      "language": "kk",
+      "audio": null,
+      "turns": [
+        {
+          "n": 1,
+          "role": "client",
+          "text": "Сәлем! Телефон нөмірімді ауыстырғым келеді",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:00:00"
+        },
+        {
+          "n": 2,
+          "role": "operator",
+          "text": "Сәлеметсіз бе! Мен Нұрлан, Freedom Broker. Көмектесемін. Алдымен ЖСН-іңізді және кодтық сөзді жазыңызшы.",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:00:40"
+        },
+        {
+          "n": 3,
+          "role": "client",
+          "text": "ЖСН 950505400123, кодтық сөз — алма",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:01:10"
+        },
+        {
+          "n": 4,
+          "role": "operator",
+          "text": "Рахмет, деректер расталды. Жаңа нөмірді қосымшада «Профиль → Байланыс» бөлімінде өзгертуге болады, SMS-код жаңа нөмірге келеді.",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:01:55"
+        },
+        {
+          "n": 5,
+          "role": "client",
+          "text": "Түсіндім",
+          "start": null,
+          "end": null,
+          "time_label": "2026-10-15T10:02:15"
+        }
+      ],
+      "result": {
+        "conversation_id": "demo-chat-kk-08",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": true,
+            "rationale": "Поздоровался и представился.",
+            "evidence_turns": [
+              2
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": null,
+            "rationale": "Клиент сразу ясно сказал, что хочет сменить номер.",
+            "evidence_turns": [
+              1
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": true,
+            "rationale": "Запросил ИИН и кодовое слово до консультации по смене номера.",
+            "evidence_turns": [
+              2,
+              4
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 20,
+            "rationale": "Подтвердил данные и объяснил, где и как сменить номер.",
+            "evidence_turns": [
+              4
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Доброжелательный тон, «помогу».",
+            "evidence_turns": [
+              2
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 10,
+            "rationale": "Быстро и грамотно.",
+            "evidence_turns": [
+              2,
+              4
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": false,
+            "rationale": "Не попрощался и не спросил, остались ли вопросы.",
+            "evidence_turns": [
+              5
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": false,
+            "rationale": "Грубых нарушений нет.",
+            "evidence_turns": [
+              2,
+              4
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 94.12,
+          "critical_flag": false
+        }
+      }
+    },
+    {
       "conversation_id": "demo-call-ru-05",
       "channel": "call",
       "language": "ru",
@@ -687,80 +963,80 @@
           "n": 1,
           "role": "event",
           "text": "Звонок принят, запись разговора включена",
-          "start": 0.4,
-          "end": 0.4,
+          "start": 0.5,
+          "end": 0.5,
           "time_label": null
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Freedom Broker, добрый день! Меня зовут Алия. Чем могу помочь?",
-          "start": 0.4,
-          "end": 4.98,
+          "start": 0.5,
+          "end": 8.18,
           "time_label": null
         },
         {
           "n": 3,
           "role": "client",
           "text": "Здравствуйте. Я хочу вывести деньги с брокерского счёта на карту.",
-          "start": 5.68,
-          "end": 9.39,
+          "start": 8.78,
+          "end": 14.68,
           "time_label": null
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Конечно, помогу. Для начала назовите, пожалуйста, ваш ИИН и кодовое слово.",
-          "start": 10.09,
-          "end": 15.5,
+          "start": 15.28,
+          "end": 22.87,
           "time_label": null
         },
         {
           "n": 5,
           "role": "client",
           "text": "ИИН девятьсот девяносто, ноль один, ноль один. Кодовое слово — ласточка.",
-          "start": 16.2,
-          "end": 20.84,
+          "start": 23.47,
+          "end": 30.62,
           "time_label": null
         },
         {
           "n": 6,
           "role": "operator",
           "text": "Спасибо, данные совпали. Какую сумму хотите вывести и на какую карту?",
-          "start": 21.54,
-          "end": 26.4,
+          "start": 31.22,
+          "end": 38.13,
           "time_label": null
         },
         {
           "n": 7,
           "role": "client",
           "text": "Пятьсот долларов, на карту Фридом Банка.",
-          "start": 27.1,
-          "end": 29.42,
+          "start": 38.73,
+          "end": 42.55,
           "time_label": null
         },
         {
           "n": 8,
           "role": "operator",
           "text": "Подаю заявку. Деньги поступят в течение одного рабочего дня. Комиссии за вывод на карту Фридом Банка нет.",
-          "start": 30.12,
-          "end": 36.87,
+          "start": 43.15,
+          "end": 52.6,
           "time_label": null
         },
         {
           "n": 9,
           "role": "client",
           "text": "Отлично, спасибо.",
-          "start": 37.57,
-          "end": 38.93,
+          "start": 53.2,
+          "end": 55.82,
           "time_label": null
         },
         {
           "n": 10,
           "role": "operator",
           "text": "Пожалуйста! Могу ещё чем-нибудь помочь? Хорошего дня, до свидания!",
-          "start": 39.63,
-          "end": 44.5,
+          "start": 56.42,
+          "end": 63.98,
           "time_label": null
         }
       ],
@@ -854,72 +1130,72 @@
           "n": 1,
           "role": "operator",
           "text": "Алло, слушаю.",
-          "start": 0.4,
-          "end": 1.56,
+          "start": 0.5,
+          "end": 2.9,
           "time_label": null
         },
         {
           "n": 2,
           "role": "client",
           "text": "Здравствуйте. Мне пришло уведомление о маржин колле. Что это значит и что мне делать?",
-          "start": 2.26,
-          "end": 7.34,
+          "start": 3.5,
+          "end": 12.0,
           "time_label": null
         },
         {
           "n": 3,
           "role": "operator",
           "text": "Ну это когда денег не хватает.",
-          "start": 8.04,
-          "end": 9.97,
+          "start": 12.6,
+          "end": 15.04,
           "time_label": null
         },
         {
           "n": 4,
           "role": "client",
           "text": "А что конкретно мне сделать, чтобы позиции не закрыли?",
-          "start": 10.67,
-          "end": 13.76,
+          "start": 15.64,
+          "end": 20.11,
           "time_label": null
         },
         {
           "n": 5,
           "role": "operator",
           "text": "Пополните счёт и всё.",
-          "start": 14.46,
-          "end": 15.79,
+          "start": 20.71,
+          "end": 22.8,
           "time_label": null
         },
         {
           "n": 6,
           "role": "client",
           "text": "А сколько нужно пополнить?",
-          "start": 16.49,
-          "end": 17.91,
+          "start": 23.4,
+          "end": 26.06,
           "time_label": null
         },
         {
           "n": 7,
           "role": "operator",
           "text": "Посмотрите в приложении.",
-          "start": 18.61,
-          "end": 20.14,
+          "start": 26.66,
+          "end": 29.25,
           "time_label": null
         },
         {
           "n": 8,
           "role": "client",
           "text": "Ладно, спасибо.",
-          "start": 20.84,
-          "end": 22.08,
+          "start": 29.85,
+          "end": 32.32,
           "time_label": null
         },
         {
           "n": 9,
           "role": "operator",
           "text": "До свидания.",
-          "start": 22.78,
-          "end": 23.69,
+          "start": 32.92,
+          "end": 35.08,
           "time_label": null
         }
       ],
@@ -1002,6 +1278,572 @@
         "score": {
           "final_score": 20.0,
           "critical_flag": false
+        }
+      }
+    },
+    {
+      "conversation_id": "demo-call-kk-09",
+      "channel": "call",
+      "language": "kk",
+      "audio": "data/audio/demo-call-kk-09.m4a",
+      "turns": [
+        {
+          "n": 1,
+          "role": "operator",
+          "text": "Freedom Broker, сәлеметсіз бе! Мен Айгүл. Сізге қалай көмектесе аламын?",
+          "start": 0.5,
+          "end": 6.43,
+          "time_label": null
+        },
+        {
+          "n": 2,
+          "role": "client",
+          "text": "Сәлеметсіз бе. Дивидендтерден салық қалай ұсталады?",
+          "start": 7.03,
+          "end": 11.76,
+          "time_label": null
+        },
+        {
+          "n": 3,
+          "role": "operator",
+          "text": "Қай елдің акциялары туралы сұрап тұрсыз: Қазақстан ба, әлде Америка ма?",
+          "start": 12.36,
+          "end": 18.02,
+          "time_label": null
+        },
+        {
+          "n": 4,
+          "role": "client",
+          "text": "Америка акциялары.",
+          "start": 18.62,
+          "end": 20.8,
+          "time_label": null
+        },
+        {
+          "n": 5,
+          "role": "operator",
+          "text": "Америка акцияларының дивидендтерінен әдетте он пайыз салық ұсталады. Ол автоматты түрде ұсталады, сізге ештеңе істеудің қажеті жоқ.",
+          "start": 21.4,
+          "end": 31.32,
+          "time_label": null
+        },
+        {
+          "n": 6,
+          "role": "client",
+          "text": "Жақсы, түсіндім. Рахмет.",
+          "start": 31.92,
+          "end": 35.18,
+          "time_label": null
+        },
+        {
+          "n": 7,
+          "role": "operator",
+          "text": "Оқасы жоқ! Тағы сұрақтарыңыз бар ма? Сау болыңыз!",
+          "start": 35.78,
+          "end": 41.32,
+          "time_label": null
+        }
+      ],
+      "result": {
+        "conversation_id": "demo-call-kk-09",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": true,
+            "rationale": "Поздоровался, назвал компанию и имя.",
+            "evidence_turns": [
+              1
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": true,
+            "rationale": "Уточнил, о каких акциях речь: казахстанских или американских.",
+            "evidence_turns": [
+              3
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": null,
+            "rationale": "Общий вопрос о налоге не требует идентификации.",
+            "evidence_turns": [
+              2
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 15,
+            "rationale": "Объяснил удержание налога, но не уточнил, от чего зависит ставка (форма W-8BEN).",
+            "evidence_turns": [
+              5
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Доброжелательный, спокойный тон.",
+            "evidence_turns": [
+              1,
+              7
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 10,
+            "rationale": "Разговор вёл чётко и грамотно.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": true,
+            "rationale": "Спросил о других вопросах и попрощался.",
+            "evidence_turns": [
+              7
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": false,
+            "rationale": "Грубых нарушений нет.",
+            "evidence_turns": [
+              5
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 93.75,
+          "critical_flag": false
+        }
+      }
+    },
+    {
+      "conversation_id": "demo-call-en-10",
+      "channel": "call",
+      "language": "en",
+      "audio": "data/audio/demo-call-en-10.m4a",
+      "turns": [
+        {
+          "n": 1,
+          "role": "operator",
+          "text": "Hello, how can I help?",
+          "start": 0.5,
+          "end": 2.92,
+          "time_label": null
+        },
+        {
+          "n": 2,
+          "role": "client",
+          "text": "Hi, I'm moving to Kazakhstan and want to open a brokerage account. Is it possible for a foreigner?",
+          "start": 3.52,
+          "end": 9.38,
+          "time_label": null
+        },
+        {
+          "n": 3,
+          "role": "operator",
+          "text": "Yes, absolutely. You will need your passport and a local tax number. Do you already have a local tax number?",
+          "start": 9.98,
+          "end": 18.76,
+          "time_label": null
+        },
+        {
+          "n": 4,
+          "role": "client",
+          "text": "Not yet.",
+          "start": 19.36,
+          "end": 21.24,
+          "time_label": null
+        },
+        {
+          "n": 5,
+          "role": "operator",
+          "text": "No problem. You can get it at any public service center. After that, you can open the account online in our app in about fifteen minutes.",
+          "start": 21.84,
+          "end": 31.84,
+          "time_label": null
+        },
+        {
+          "n": 6,
+          "role": "client",
+          "text": "Great, thank you!",
+          "start": 32.44,
+          "end": 34.32,
+          "time_label": null
+        },
+        {
+          "n": 7,
+          "role": "operator",
+          "text": "You're welcome! Is there anything else I can help with? Have a nice day!",
+          "start": 34.92,
+          "end": 41.11,
+          "time_label": null
+        }
+      ],
+      "result": {
+        "conversation_id": "demo-call-en-10",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": false,
+            "rationale": "Поздоровался, но не назвал ни своё имя, ни компанию.",
+            "evidence_turns": [
+              1
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": true,
+            "rationale": "Уточнил, есть ли у клиента ИИН.",
+            "evidence_turns": [
+              3
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": null,
+            "rationale": "Вопрос об открытии счёта не требует идентификации.",
+            "evidence_turns": [
+              2
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 20,
+            "rationale": "Перечислил документы, где получить ИИН и как открыть счёт.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Дружелюбный тон, «No problem».",
+            "evidence_turns": [
+              5,
+              7
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 10,
+            "rationale": "Разговор вёл уверенно и понятно.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": true,
+            "rationale": "Предложил помощь и попрощался.",
+            "evidence_turns": [
+              7
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": false,
+            "rationale": "Грубых нарушений нет.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 87.5,
+          "critical_flag": false
+        }
+      }
+    },
+    {
+      "conversation_id": "demo-call-ru-11",
+      "channel": "call",
+      "language": "ru",
+      "audio": "data/audio/demo-call-ru-11.m4a",
+      "turns": [
+        {
+          "n": 1,
+          "role": "operator",
+          "text": "Freedom Broker, здравствуйте! Меня зовут Мадина. Чем могу помочь?",
+          "start": 0.5,
+          "end": 7.89,
+          "time_label": null
+        },
+        {
+          "n": 2,
+          "role": "client",
+          "text": "Здравствуйте. Я третий день не могу вывести деньги, заявка висит! Это вообще нормально?",
+          "start": 8.49,
+          "end": 15.52,
+          "time_label": null
+        },
+        {
+          "n": 3,
+          "role": "operator",
+          "text": "Понимаю, это очень неприятно, когда деньги задерживаются. Давайте разберёмся. Назовите, пожалуйста, ИИН и кодовое слово.",
+          "start": 16.12,
+          "end": 27.6,
+          "time_label": null
+        },
+        {
+          "n": 4,
+          "role": "client",
+          "text": "ИИН восемьсот восемьдесят, ноль два, ноль три. Кодовое слово — горы.",
+          "start": 28.2,
+          "end": 34.8,
+          "time_label": null
+        },
+        {
+          "n": 5,
+          "role": "operator",
+          "text": "Спасибо, данные подтверждены. Вижу заявку: банк-получатель запросил уточнение реквизитов. Я передам её в бэк-офис с пометкой «срочно», ответ будет сегодня до восемнадцати часов.",
+          "start": 35.4,
+          "end": 49.89,
+          "time_label": null
+        },
+        {
+          "n": 6,
+          "role": "client",
+          "text": "Хорошо, буду ждать.",
+          "start": 50.49,
+          "end": 53.08,
+          "time_label": null
+        },
+        {
+          "n": 7,
+          "role": "operator",
+          "text": "Мы пришлём уведомление в приложении. Если что-то ещё понадобится — звоните. Всего доброго!",
+          "start": 53.68,
+          "end": 62.47,
+          "time_label": null
+        }
+      ],
+      "result": {
+        "conversation_id": "demo-call-ru-11",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": true,
+            "rationale": "Поздоровался и представился.",
+            "evidence_turns": [
+              1
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": true,
+            "rationale": "Выяснил, о какой заявке речь, и нашёл причину задержки.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": true,
+            "rationale": "Запросил ИИН и кодовое слово до разговора о счёте.",
+            "evidence_turns": [
+              3
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 15,
+            "rationale": "Нашёл причину и передал заявку, но не объяснил клиенту, может ли он сам исправить реквизиты.",
+            "evidence_turns": [
+              5
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Признал неудобство клиента: «понимаю, это очень неприятно».",
+            "evidence_turns": [
+              3
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 10,
+            "rationale": "Спокойно и чётко вёл разговор с недовольным клиентом.",
+            "evidence_turns": [
+              3,
+              5,
+              7
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": true,
+            "rationale": "Сказал, как клиент узнает результат, и попрощался.",
+            "evidence_turns": [
+              7
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": false,
+            "rationale": "Грубых нарушений нет.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 95.0,
+          "critical_flag": false
+        }
+      }
+    },
+    {
+      "conversation_id": "demo-call-ru-12",
+      "channel": "call",
+      "language": "ru",
+      "audio": "data/audio/demo-call-ru-12.m4a",
+      "turns": [
+        {
+          "n": 1,
+          "role": "operator",
+          "text": "Freedom Broker, добрый день, Ерлан. Слушаю вас.",
+          "start": 0.5,
+          "end": 5.11,
+          "time_label": null
+        },
+        {
+          "n": 2,
+          "role": "client",
+          "text": "Добрый день. Я новичок, хочу вложить деньги. Что посоветуете?",
+          "start": 5.71,
+          "end": 13.12,
+          "time_label": null
+        },
+        {
+          "n": 3,
+          "role": "operator",
+          "text": "Берите акции Теслы, они точно вырастут процентов на тридцать за полгода, я вам гарантирую.",
+          "start": 13.72,
+          "end": 20.76,
+          "time_label": null
+        },
+        {
+          "n": 4,
+          "role": "client",
+          "text": "Прямо гарантируете?",
+          "start": 21.36,
+          "end": 23.71,
+          "time_label": null
+        },
+        {
+          "n": 5,
+          "role": "operator",
+          "text": "Да, сто процентов. Все так делают.",
+          "start": 24.31,
+          "end": 24.43,
+          "time_label": null
+        },
+        {
+          "n": 6,
+          "role": "client",
+          "text": "Хорошо, подумаю. Спасибо.",
+          "start": 25.03,
+          "end": 29.37,
+          "time_label": null
+        },
+        {
+          "n": 7,
+          "role": "operator",
+          "text": "Давайте, до свидания.",
+          "start": 29.97,
+          "end": 32.9,
+          "time_label": null
+        }
+      ],
+      "result": {
+        "conversation_id": "demo-call-ru-12",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": true,
+            "rationale": "Поздоровался, назвал компанию и имя.",
+            "evidence_turns": [
+              1
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": false,
+            "rationale": "Не выяснил цели, срок и опыт клиента перед советом.",
+            "evidence_turns": [
+              3
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": null,
+            "rationale": "Общий вопрос не требует идентификации.",
+            "evidence_turns": [
+              2
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 0,
+            "rationale": "Дал недопустимый совет с гарантией доходности.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Тон дружелюбный.",
+            "evidence_turns": [
+              1,
+              7
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 7,
+            "rationale": "Разговор живой, но поверхностный.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": true,
+            "rationale": "Попрощался.",
+            "evidence_turns": [
+              7
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": true,
+            "rationale": "Гарантировал доходность акций — грубое нарушение для брокера.",
+            "evidence_turns": [
+              3,
+              5
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 50.63,
+          "critical_flag": true
         }
       }
     }

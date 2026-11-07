@@ -5,3 +5,4 @@ __pycache__/
 # кэш ответов модели (кроме демо, он нужен для запуска без ключа)
 cache/*
 !cache/demo.json
+!cache/demo-prod.json

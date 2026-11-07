@@ -4,9 +4,11 @@
 // Апелляции и решения проверяющего хранятся в localStorage браузера.
 // =====================================================================
 
-const SETS = ["dev", "prod", "demo"];          // какие наборы пробуем загрузить
+const SETS = ["dev", "prod", "demo", "demo-prod"];   // какие наборы пробуем загрузить
+const SET_NAMES = { dev: "DEV", prod: "PROD", demo: "DEMO", "demo-prod": "PROD (пример)" };
 const SCALE_MAX = { consultation: 20, dialogue: 10 };
 const LANGUAGES = { ru: "Русский", kk: "Қазақша", en: "English" };
+const LANG_CODES = { ru: "RU", kk: "KZ", en: "EN" };
 const ROLES = { client: "Клиент", operator: "Оператор", bot: "Бот", event: "Событие" };
 
 let data = null;          // загруженный набор: { set, model, checklist, dialogs }
@@ -61,6 +63,18 @@ function calcScore(values) {
 function esc(text) {
   return String(text ?? "").replace(/[&<>"']/g, (ch) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+// Иконка из набора в index.html: icon("chat") -> <svg><use href="#i-chat"></svg>
+function icon(name) {
+  return `<svg class="i"><use href="#i-${name}"></use></svg>`;
+}
+function channelHtml(d) {
+  return d.channel === "call"
+    ? `<span class="channel call">${icon("call")}Звонок</span>`
+    : `<span class="channel chat">${icon("chat")}Чат</span>`;
+}
+function langHtml(code) {
+  return `<span class="lang lang-${code}">${LANG_CODES[code] || esc(code)}</span>${LANGUAGES[code] || ""}`;
 }
 function fmtNum(x) {
   return Number(x).toLocaleString("ru-RU", { maximumFractionDigits: 2 });
@@ -155,7 +169,7 @@ async function start() {
     return;
   }
   select.innerHTML = names.map((n) =>
-    `<option value="${n}">${n.toUpperCase()} · ${available[n].dialogs.length} диалогов</option>`).join("");
+    `<option value="${n}">${SET_NAMES[n] || n} · ${available[n].dialogs.length} диалогов</option>`).join("");
   const saved = loadStored("cqa_set", names[0]);
   select.value = names.includes(saved) ? saved : names[0];
   select.addEventListener("change", () => {
@@ -221,12 +235,23 @@ function updateAppealBadge() {
 // =====================================================================
 function renderDialogs() {
   const app = document.getElementById("app");
-  const okCount = data.dialogs.filter(isOk).length;
+  const ok = data.dialogs.filter(isOk);
+  const scores = ok.map((d) => calcScore(finalValues(d)).final_score);
+  const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+  const critical = ok.filter((d) => finalValues(d).critical).length;
+  const calls = data.dialogs.filter((d) => d.channel === "call").length;
   app.innerHTML = `
-    <div class="page-head">
+    <div class="hero">
       <div>
-        <h1>Диалоги</h1>
-        <div class="muted">${data.dialogs.length} диалогов · оценено ${okCount} · ошибок ${data.dialogs.length - okCount}</div>
+        <div class="hero-kicker">${icon("spark")} Контроль качества · ${SET_NAMES[data.set] || data.set}</div>
+        <h1>Диалоги <span class="gradient-text">операторов</span></h1>
+        <div class="hero-sub">ИИ оценивает каждый разговор по чек-листу, а человек принимает финальное решение</div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>${data.dialogs.length}</b><span>${data.dialogs.length - calls} чатов · ${calls} звонков</span></div>
+        <div class="hero-stat"><b>${fmtNum(avg.toFixed(1))}</b><span>средний балл</span></div>
+        <div class="hero-stat danger"><b>${critical}</b><span>с нарушением</span></div>
+        <div class="hero-stat"><b>${data.dialogs.length - ok.length}</b><span>ошибок оценки</span></div>
       </div>
     </div>
     <div class="card">
@@ -300,14 +325,14 @@ function fillDialogRows() {
       const score = calcScore(values).final_score;
       const changed = score !== d.result.score.final_score ? ' <span class="changed">изм.</span>' : "";
       scoreCell = `<span class="badge score-badge ${scoreClass(score)}">${fmtNum(score)}</span>${changed}`;
-      flagCell = values.critical ? '<span class="flag">⚠ Да</span>' : '<span class="muted">Нет</span>';
+      flagCell = values.critical ? `<span class="flag">${icon("alert")}Да</span>` : '<span class="muted">Нет</span>';
       statusCell = '<span class="badge good">Оценён</span>';
     }
     const review = reviewStatus(d);
     return `<tr class="clickable" data-id="${esc(d.conversation_id)}">
       <td class="id-cell">${esc(d.conversation_id)}</td>
-      <td>${d.channel === "call" ? "📞 Звонок" : "💬 Чат"}</td>
-      <td>${LANGUAGES[d.language] || esc(d.language)}</td>
+      <td>${channelHtml(d)}</td>
+      <td>${langHtml(d.language)}</td>
       <td>${scoreCell}</td>
       <td>${flagCell}</td>
       <td>${statusCell}</td>
@@ -337,8 +362,8 @@ function renderDialog(id) {
     <div class="page-head">
       <div class="dialog-title">
         <h1>${esc(d.conversation_id)}</h1>
-        <span class="chip">${isCall ? "📞 Звонок" : "💬 Чат"}</span>
-        <span class="chip">${LANGUAGES[d.language] || esc(d.language)}</span>
+        <span class="chip">${channelHtml(d)}</span>
+        <span class="chip">${langHtml(d.language)}</span>
         <span class="chip">${d.turns.length} реплик</span>
       </div>
     </div>
@@ -451,7 +476,7 @@ function scoreCardsHtml(d) {
   return `
     <div class="card">
       <h2>Оценка качества</h2>
-      ${values.critical ? '<div class="critical-alert">⚠ Выявлено грубое нарушение. Балл не обнулён, но диалог требует внимания руководителя.</div>' : ""}
+      ${values.critical ? '<div class="critical-alert">${icon("alert")} Выявлено грубое нарушение. Балл не обнулён, но диалог требует внимания руководителя.</div>' : ""}
       <div class="score-head">
         <div class="ring">
           <svg width="136" height="136">
@@ -473,7 +498,7 @@ function scoreCardsHtml(d) {
         <button class="btn btn-primary" id="btn-appeal">Оспорить оценку</button>
         <button class="btn" id="btn-confirm">Подтвердить оценку</button>
       </div>
-      <div class="ai-note">Оценку предложил ИИ. Решение принимает человек.</div>
+      <div class="ai-note">${icon("spark")} Оценку предложил ИИ. Решение принимает человек.</div>
     </div>
     <div class="card">
       <h2>Почему снижена оценка</h2>
@@ -725,7 +750,7 @@ function renderAppeals(selectedId) {
   app.innerHTML = `
     <div class="page-head">
       <div><h1>Апелляции</h1><div class="muted">Человек проверяет спорные оценки ИИ и принимает финальное решение</div></div>
-      <button class="btn" id="download">⬇ Скачать appeals.json</button>
+      <button class="btn" id="download">${icon("download")} Скачать appeals.json</button>
     </div>
     <div class="appeal-layout">
       <div class="card">
@@ -876,27 +901,94 @@ const ADVICE = {
   critical: ["service", "Сервис", "Каждый случай грубого нарушения разбирать с руководителем; добавить автопроверку рискованных фраз."],
 };
 
+// Круговая диаграмма (бублик) на SVG: parts = [{ label, value, color }]
+function donutHtml(parts, centerValue, centerLabel) {
+  const total = parts.reduce((sum, p) => sum + p.value, 0) || 1;
+  const r = 62;
+  const circle = 2 * Math.PI * r;
+  let offset = 0;
+  const arcs = parts.map((p) => {
+    const length = p.value / total * circle;
+    const arc = `<circle cx="80" cy="80" r="${r}" stroke="${p.color}" stroke-dasharray="${length} ${circle - length}"
+                   stroke-dashoffset="${-offset}"></circle>`;
+    offset += length;
+    return arc;
+  }).join("");
+  const legend = parts.map((p) => `
+    <div class="legend-row"><span class="dot" style="background:${p.color}"></span>${p.label}
+      <b>${p.value}</b><span class="muted">${Math.round(p.value / total * 100)}%</span></div>`).join("");
+  return `<div class="donut-wrap">
+    <div class="donut">
+      <svg width="160" height="160"><circle cx="80" cy="80" r="${r}" stroke="var(--gray-light)"></circle>${arcs}</svg>
+      <div class="donut-center"><b>${centerValue}</b><span>${centerLabel}</span></div>
+    </div>
+    <div class="legend">${legend}</div>
+  </div>`;
+}
+
+// Вертикальные столбики: items = [{ label, value (0..100), sub }]
+function columnsHtml(items) {
+  return `<div class="columns">${items.map((it) => `
+    <div class="col">
+      <div class="bar" style="height:0;background:${scoreGradient(it.value)}" data-height="${it.value}">
+        <span>${fmtNum(it.value.toFixed(1))}</span></div>
+      <div class="col-label"><b>${it.label}</b><br>${it.sub}</div>
+    </div>`).join("")}</div>`;
+}
+
+function scoreGradient(score) {
+  if (score >= 80) return "linear-gradient(180deg, #1AE276, #02B140)";
+  if (score >= 60) return "linear-gradient(180deg, #FFC94D, #E8A317)";
+  return "linear-gradient(180deg, #FF8A7A, #D9473B)";
+}
+
+function average(list) {
+  return list.length ? list.reduce((a, b) => a + b, 0) / list.length : 0;
+}
+
+const SHORT_NAMES = { contact: "Контакт", discovery: "Потреб.", identification: "Идент.", consultation: "Консульт.",
+                      empathy: "Эмпатия", dialogue: "Ведение", closure: "Заверш.", critical: "Грубые" };
+
 function renderAnalytics() {
   const app = document.getElementById("app");
   const ok = data.dialogs.filter(isOk);
+  const errors = data.dialogs.filter((d) => !isOk(d));
   const scored = ok.map((d) => ({ d, values: finalValues(d), score: calcScore(finalValues(d)).final_score }));
-  const avg = scored.length ? scored.reduce((s, x) => s + x.score, 0) / scored.length : 0;
+  const avg = average(scored.map((x) => x.score));
   const withCritical = scored.filter((x) => x.values.critical);
   const openAppeals = appeals.filter((a) => a.set === data.set && a.status === "new").length;
   const allAppeals = appeals.filter((a) => a.set === data.set).length;
 
-  // гистограмма: 10 корзин по 10 баллов
+  // 1) бублик: сколько диалогов хороших, средних, плохих
+  const donut = donutHtml([
+    { label: "Хорошо (80–100)", value: scored.filter((x) => x.score >= 80).length, color: "#02B140" },
+    { label: "Средне (60–79)", value: scored.filter((x) => x.score >= 60 && x.score < 80).length, color: "#E8A317" },
+    { label: "Плохо (0–59)", value: scored.filter((x) => x.score < 60).length, color: "#D9473B" },
+    { label: "Ошибка оценки", value: errors.length, color: "#A9B2BC" },
+  ], fmtNum(avg.toFixed(1)), "средний балл");
+
+  // 2) гистограмма: 10 корзин по 10 баллов
   const bins = new Array(10).fill(0);
   for (const x of scored) bins[Math.min(9, Math.floor(x.score / 10))]++;
   const maxBin = Math.max(1, ...bins);
   const histogram = bins.map((count, i) => `
     <div class="col">
-      <div class="bar" style="height:0;background:${i >= 8 ? "var(--green)" : i >= 6 ? "var(--yellow)" : "var(--red)"}"
-           data-height="${count / maxBin * 100}"><span>${count || ""}</span></div>
+      <div class="bar" style="height:0;background:${scoreGradient(i * 10 + 5)}" data-height="${count / maxBin * 100}">
+        <span>${count || ""}</span></div>
       <div class="col-label">${i * 10}–${i === 9 ? 100 : i * 10 + 9}</div>
     </div>`).join("");
 
-  // где теряются баллы: доля диалогов, где критерий выполнен не полностью
+  // 3) средний балл по языкам и по каналам
+  const byLanguage = Object.keys(LANGUAGES).map((code) => {
+    const list = scored.filter((x) => x.d.language === code);
+    return { label: LANG_CODES[code], value: average(list.map((x) => x.score)), sub: list.length + " диал." };
+  }).filter((it) => it.sub !== "0 диал.");
+  const byChannel = [["chat", "Чаты"], ["call", "Звонки"]].map(([code, name]) => {
+    const list = scored.filter((x) => x.d.channel === code);
+    return { label: name, value: average(list.map((x) => x.score)), sub: list.length + " диал." };
+  }).filter((it) => it.sub !== "0 диал.");
+
+  // 4) где теряются баллы: доля диалогов, где критерий выполнен не полностью
   const losses = CRITERIA.map((c) => {
     let applicable = 0, lostCount = 0, lostPoints = 0;
     const examples = [];
@@ -923,21 +1015,35 @@ function renderAnalytics() {
       <div class="hbar-value">${Math.round(l.rate * 100)}%</div>
     </div>`).join("");
 
-  // кого проверить в первую очередь: нарушения и самые низкие баллы
+  // 5) матрица качества: строки — диалоги, столбцы — критерии
+  const heatHead = CRITERIA.map((c) => `<div class="heat-head">${SHORT_NAMES[c.id] || c.id}</div>`).join("");
+  const heatRows = scored.slice().sort((a, b) => a.score - b.score).map((x) => {
+    const cells = CRITERIA.map((c) => {
+      const v = x.values[c.id];
+      let cls = "na", text = "N/A";
+      if (c.id === "critical") { cls = v ? "bad" : "good"; text = v ? "!" : "–"; }
+      else if (v !== null) { cls = shareClass(criterionShare(c.id, v)); text = valueLabel(v); }
+      return `<div class="heat-cell ${cls}" title="${esc(c.name)}: ${valueLabel(v)}">${text}</div>`;
+    }).join("");
+    return `<div class="heat-row" data-id="${esc(x.d.conversation_id)}">
+      <div class="heat-id">${esc(x.d.conversation_id)}</div>${cells}
+      <div class="heat-score"><span class="badge score-badge ${scoreClass(x.score)}">${fmtNum(x.score)}</span></div></div>`;
+  }).join("");
+
+  // 6) кого проверить в первую очередь: нарушения и самые низкие баллы
   const priority = scored.slice().sort((a, b) =>
     (b.values.critical ? 1 : 0) - (a.values.critical ? 1 : 0) || a.score - b.score).slice(0, 6);
-  const errors = data.dialogs.filter((d) => !isOk(d));
   const priorityRows = priority.map((x) => `
     <tr class="clickable" data-id="${esc(x.d.conversation_id)}">
       <td class="id-cell">${esc(x.d.conversation_id)}</td>
       <td><span class="badge score-badge ${scoreClass(x.score)}">${fmtNum(x.score)}</span></td>
-      <td>${x.values.critical ? '<span class="flag">⚠ Нарушение</span>' : "Низкий балл"}</td>
+      <td>${x.values.critical ? `<span class="flag">${icon("alert")}Нарушение</span>` : "Низкий балл"}</td>
     </tr>`).join("") + errors.map((d) => `
     <tr class="clickable" data-id="${esc(d.conversation_id)}">
       <td class="id-cell">${esc(d.conversation_id)}</td><td><span class="badge bad">Ошибка</span></td><td>Проверить вручную</td>
     </tr>`).join("");
 
-  // самые частые причины снижения: по топ-3 критериям показываем примеры объяснений ИИ
+  // 7) самые частые причины снижения: по топ-3 критериям показываем примеры объяснений ИИ
   const topLosses = losses.filter((l) => l.lostCount > 0).slice(0, 3);
   const reasons = topLosses.map((l) => {
     const samples = l.examples.slice(0, 2).map((x) => {
@@ -953,17 +1059,36 @@ function renderAnalytics() {
   }).join("") + `<div class="reco"><span class="tag tag-product">Продукт</span><div>Если клиенты часто спрашивают одно и то же (комиссии, пополнение, вывод), стоит добавить подсказки прямо в приложение — меньше обращений.</div></div>`;
 
   app.innerHTML = `
-    <div class="page-head"><div><h1>Аналитика</h1>
-      <div class="muted">Набор ${data.set.toUpperCase()} · с учётом решений проверяющих по апелляциям</div></div></div>
-    <div class="kpis">
-      <div class="card kpi"><div class="kpi-value" style="color:${shareColor(avg >= 80 ? 1 : avg >= 60 ? .6 : 0)}">${fmtNum(avg.toFixed(1))}</div><div class="kpi-label">Средний балл</div></div>
-      <div class="card kpi"><div class="kpi-value" style="color:var(--red)">${scored.length ? Math.round(withCritical.length / scored.length * 100) : 0}%</div><div class="kpi-label">Диалогов с грубым нарушением (${withCritical.length})</div></div>
-      <div class="card kpi"><div class="kpi-value">${ok.length}<span class="muted" style="font-size:20px"> / ${data.dialogs.length}</span></div><div class="kpi-label">Оценено (ошибок: ${errors.length})</div></div>
-      <div class="card kpi"><div class="kpi-value">${allAppeals}</div><div class="kpi-label">Апелляций (открыто: ${openAppeals})</div></div>
+    <div class="hero">
+      <div>
+        <div class="hero-kicker">${icon("analytics")} ${SET_NAMES[data.set] || data.set} · с учётом решений по апелляциям</div>
+        <h1>Аналитика <span class="gradient-text">качества</span></h1>
+        <div class="hero-sub">Где операторы теряют баллы и что стоит улучшить</div>
+      </div>
     </div>
-    <div class="grid-2">
+    <div class="kpis">
+      <div class="card kpi"><div class="kpi-icon green">${icon("star")}</div><div><div class="kpi-value">${fmtNum(avg.toFixed(1))}</div><div class="kpi-label">Средний балл</div></div></div>
+      <div class="card kpi"><div class="kpi-icon red">${icon("alert")}</div><div><div class="kpi-value">${scored.length ? Math.round(withCritical.length / scored.length * 100) : 0}%</div><div class="kpi-label">С грубым нарушением (${withCritical.length})</div></div></div>
+      <div class="card kpi"><div class="kpi-icon blue">${icon("check")}</div><div><div class="kpi-value">${ok.length}<span class="muted" style="font-size:18px"> / ${data.dialogs.length}</span></div><div class="kpi-label">Оценено (ошибок: ${errors.length})</div></div></div>
+      <div class="card kpi"><div class="kpi-icon violet">${icon("appeals")}</div><div><div class="kpi-value">${allAppeals}</div><div class="kpi-label">Апелляций (открыто: ${openAppeals})</div></div></div>
+    </div>
+    <div class="grid-3">
+      <div class="card"><h2>Качество диалогов</h2>${donut}</div>
+      <div class="card"><h2>Распределение баллов</h2><div class="histogram">${histogram}</div></div>
+      <div class="card"><h2>Средний балл</h2>
+        <div class="split-charts">
+          <div><div class="muted small-title">по языкам</div>${columnsHtml(byLanguage)}</div>
+          <div><div class="muted small-title">по каналам</div>${columnsHtml(byChannel)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:22px">
+      <h2>Матрица качества</h2>
+      <div class="muted" style="margin:-8px 0 14px">Каждая строка — диалог, каждый столбец — критерий. Нажмите на строку, чтобы открыть диалог.</div>
+      <div class="heatmap"><div class="heat-row heat-header"><div></div>${heatHead}<div></div></div>${heatRows}</div>
+    </div>
+    <div class="grid-2" style="margin-top:22px">
       <div class="stack">
-        <div class="card"><h2>Распределение баллов</h2><div class="histogram">${histogram}</div></div>
         <div class="card"><h2>Где чаще всего теряются баллы</h2>${lossBars}</div>
         <div class="card"><h2>Самые частые причины снижения</h2>${reasons}</div>
       </div>
@@ -973,17 +1098,17 @@ function renderAnalytics() {
         <div class="card"><h2>Что стоит улучшить</h2>${advice}</div>
       </div>
     </div>
-    <div class="card" style="margin-top:22px"><h2>Что это даёт бизнесу</h2>
+    <div class="card business" style="margin-top:22px"><h2>Что это даёт бизнесу</h2>
       <div class="benefits">
-        <div class="benefit"><b>Качество сервиса</b>Проверяются 100% диалогов, а не 2–3% выборочно.</div>
-        <div class="benefit"><b>Контроль рисков</b>Грубые нарушения (данные без идентификации, просьба кода из SMS) видны сразу.</div>
-        <div class="benefit"><b>Развитие сотрудников</b>Каждая оценка с объяснением и цитатой — готовый материал для обратной связи.</div>
-        <div class="benefit"><b>Улучшение процессов</b>Видно, что чинить: инструкцию, сервис или продукт.</div>
+        <div class="benefit"><div class="kpi-icon green">${icon("star")}</div><b>Качество сервиса</b>Проверяются 100% диалогов, а не 2–3% выборочно.</div>
+        <div class="benefit"><div class="kpi-icon red">${icon("shield")}</div><b>Контроль рисков</b>Грубые нарушения (данные без идентификации, просьба кода из SMS) видны сразу.</div>
+        <div class="benefit"><div class="kpi-icon blue">${icon("people")}</div><b>Развитие сотрудников</b>Каждая оценка с объяснением и цитатой — готовый материал для обратной связи.</div>
+        <div class="benefit"><div class="kpi-icon violet">${icon("gear")}</div><b>Улучшение процессов</b>Видно, что чинить: инструкцию, сервис или продукт.</div>
       </div>
     </div>`;
 
-  app.querySelectorAll("tr[data-id]").forEach((tr) =>
-    tr.addEventListener("click", () => { location.hash = "#dialog/" + encodeURIComponent(tr.dataset.id); }));
+  app.querySelectorAll("tr[data-id], .heat-row[data-id]").forEach((row) =>
+    row.addEventListener("click", () => { location.hash = "#dialog/" + encodeURIComponent(row.dataset.id); }));
   requestAnimationFrame(() => requestAnimationFrame(() => {
     app.querySelectorAll("[data-height]").forEach((el) => { el.style.height = el.dataset.height + "%"; });
     app.querySelectorAll("[data-width]").forEach((el) => { el.style.width = el.dataset.width + "%"; });
@@ -1017,7 +1142,7 @@ function renderChecklist() {
       <p><b>Грубые ошибки</b> не входят в сумму и не обнуляют балл — это отдельный флаг для руководителя.</p>
       <p><b>Пример:</b> контакт = Да, потребность = N/A, идентификация = N/A, консультация = 15, эмпатия = Да, ведение = 7, завершение = Да →
          (10 + 15 + 15 + 10,5 + 5) / 65 × 100 = <b>${fmtNum(calcScore({ contact: true, discovery: null, identification: null, consultation: 15, empathy: true, dialogue: 7, closure: true, critical: false }).final_score)}</b></p>
-      <p class="muted">Балл считает код, а не ИИ. Проверка: формула сайта совпала с Python в ${formulaCheck.same} из ${formulaCheck.total} диалогов ${formulaCheck.same === formulaCheck.total ? "✓" : "⚠"}</p>
+      <p class="muted">Балл считает код, а не ИИ. Проверка: формула сайта совпала с Python в ${formulaCheck.same} из ${formulaCheck.total} диалогов ${formulaCheck.same === formulaCheck.total ? "✓" : "✗"}</p>
     </div>`;
 }
 

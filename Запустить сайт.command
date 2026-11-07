@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 # если данных для сайта ещё нет, создаём демо-набор
 if [ ! -f web/data/dialogs_demo.json ]; then
   python3 evaluate.py --set demo
+  python3 evaluate.py --set demo-prod
 fi
 
 # если порт 8000 уже занят, берём следующий свободный

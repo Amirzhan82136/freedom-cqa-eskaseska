@@ -3,7 +3,8 @@
 # Запуск:
 #   python3 evaluate.py --set dev     -> results/dev/results.json
 #   python3 evaluate.py --set prod    -> results/prod/results.json
-#   python3 evaluate.py --set demo    -> демо-данные для сайта (без ключа, из кэша)
+#   python3 evaluate.py --set demo       -> демо-данные для сайта (без ключа, из кэша)
+#   python3 evaluate.py --set demo-prod  -> пример PROD для сайта (тоже демо)
 
 import argparse
 import json
@@ -175,7 +176,7 @@ def load_dialogs(set_name):
     """Получить диалоги: из API (если задан CQA_API_URL) или из папки data/<набор>/."""
     api_url = os.getenv("CQA_API_URL")
     folder = os.path.join("data", set_name)
-    if api_url and set_name != "demo":
+    if api_url and not set_name.startswith("demo"):
         print("Скачиваю диалоги из API:", api_url)
         raw = fetch_from_api(api_url, set_name)
         os.makedirs(folder, exist_ok=True)
@@ -438,12 +439,12 @@ def prepare_audio(dialog):
 
 def main():
     parser = argparse.ArgumentParser(description="Оценка диалогов операторов")
-    parser.add_argument("--set", required=True, choices=["dev", "prod", "demo"])
+    parser.add_argument("--set", required=True, choices=["dev", "prod", "demo", "demo-prod"])
     parser.add_argument("--limit", type=int, default=0, help="оценить только первые N диалогов (для пробы)")
     parser.add_argument("--workers", type=int, default=4, help="сколько диалогов оценивать одновременно")
     args = parser.parse_args()
 
-    if args.set != "demo" and not os.getenv("ANTHROPIC_API_KEY"):
+    if not args.set.startswith("demo") and not os.getenv("ANTHROPIC_API_KEY"):
         raise SystemExit("Нет ключа модели: впишите ANTHROPIC_API_KEY в файл .env (см. .env.example)")
 
     started = time.time()
@@ -479,8 +480,8 @@ def main():
         "model": {"mode": "external_api", "name": ", ".join(models_used) or MODEL},
         "results": results,
     }
-    if args.set == "demo":
-        results_path = os.path.join("data", "demo", "results.json")   # демо не смешиваем с настоящими
+    if args.set.startswith("demo"):
+        results_path = os.path.join("data", args.set, "results.json")   # демо не смешиваем с настоящими
     else:
         results_path = os.path.join("results", args.set, "results.json")
     save_json(results_path, report)
