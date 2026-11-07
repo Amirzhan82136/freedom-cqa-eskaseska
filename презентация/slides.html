@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Freedom CQA · Питч</title>
+<style>
+  :root {
+    --brand-dark: #0A2E20; --brand: #164734; --green: #02B140; --green-dark: #018A32; --neon: #1AE276;
+    --green-light: #E6F7EC; --blue: #5B6EE1; --blue-light: #ECEFFD; --violet: #8B5CF6; --violet-light: #F1EAFE;
+    --red: #D9473B; --red-light: #FDEBE8; --yellow: #E8A317; --yellow-light: #FFF5DD;
+    --text: #0E151C; --muted: #5E6B77; --bg: #F2F5F4;
+    --gradient: linear-gradient(91deg, #7D8DEE -2%, #1CCC9E 30%, #1AE276 85%);
+  }
+  @page { size: 1280px 720px; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #2b2f33; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--text); }
+  .slide {
+    width: 1280px; height: 720px; position: relative; overflow: hidden;
+    background: white; margin: 30px auto; padding: 56px 72px;
+    background: radial-gradient(600px 400px at 100% 0%, rgba(125,141,238,.14), transparent 70%),
+                radial-gradient(600px 420px at 100% 100%, rgba(26,226,118,.12), transparent 70%), #FBFCFC;
+    page-break-after: always; break-after: page;
+  }
+  @media print { body { background: none; } .slide { margin: 0; } }
+  .dark { background: radial-gradient(700px 500px at 0% 100%, rgba(26,226,118,.30), transparent 65%),
+                      radial-gradient(600px 400px at 100% 0%, rgba(125,141,238,.22), transparent 70%),
+                      linear-gradient(135deg, #082619, #164734); color: white; }
+  .num { position: absolute; right: 72px; bottom: 34px; font-size: 14px; color: var(--muted); }
+  .dark .num { color: rgba(255,255,255,.55); }
+  .logo-small { position: absolute; left: 72px; bottom: 30px; height: 22px; }
+  .kicker { display: inline-flex; gap: 8px; align-items: center; font-size: 15px; font-weight: 700; color: var(--green-dark);
+            background: var(--green-light); padding: 6px 14px; border-radius: 999px; margin-bottom: 18px; }
+  .dark .kicker { background: rgba(26,226,118,.16); color: var(--neon); }
+  h1 { font-size: 44px; line-height: 1.12; margin: 0 0 14px; letter-spacing: -.5px; }
+  h2 { font-size: 22px; margin: 0 0 8px; }
+  p { margin: 0; }
+  .lead { font-size: 21px; color: var(--muted); line-height: 1.45; max-width: 900px; }
+  .dark .lead { color: rgba(255,255,255,.78); }
+  .grad { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .row { display: flex; gap: 24px; }
+  .card { background: white; border-radius: 22px; padding: 26px 26px; box-shadow: 0 2px 4px rgba(14,59,42,.05), 0 10px 30px rgba(14,59,42,.08); flex: 1; }
+  .card p { font-size: 17px; color: var(--muted); line-height: 1.45; }
+  .ic { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; margin-bottom: 16px; }
+  .ic svg { width: 28px; height: 28px; }
+  .g { background: var(--green-light); color: var(--green-dark); } .b { background: var(--blue-light); color: var(--blue); }
+  .v { background: var(--violet-light); color: var(--violet); } .r { background: var(--red-light); color: var(--red); }
+  .y { background: var(--yellow-light); color: #9A6A00; }
+  .big { font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -1px; }
+  .small { font-size: 15px; color: var(--muted); margin-top: 8px; }
+  ul.clean { list-style: none; padding: 0; margin: 0; }
+  ul.clean li { display: flex; gap: 14px; align-items: flex-start; font-size: 19px; line-height: 1.4; margin-bottom: 16px; }
+  .tick { flex-shrink: 0; width: 28px; height: 28px; border-radius: 9px; background: var(--green-light); color: var(--green-dark);
+          display: grid; place-items: center; font-weight: 900; font-size: 16px; }
+  .shot { border-radius: 16px; box-shadow: 0 16px 50px rgba(0,0,0,.18); display: block; }
+  table { border-collapse: collapse; width: 100%; font-size: 17px; }
+  td { padding: 9px 10px; border-bottom: 1px solid #E3E8E6; }
+  .wbar { height: 12px; border-radius: 6px; background: var(--gradient); }
+  .formula { background: var(--gradient); color: white; border-radius: 16px; padding: 18px 22px; font-size: 20px; font-weight: 700; line-height: 1.4; }
+  .flow { display: flex; align-items: stretch; gap: 10px; margin-top: 34px; }
+  .step { flex: 1; background: white; border-radius: 20px; padding: 22px 18px; box-shadow: 0 10px 30px rgba(14,59,42,.08); }
+  .step b { display: block; font-size: 18px; margin: 12px 0 6px; }
+  .step p { font-size: 15px; color: var(--muted); line-height: 1.4; }
+  .stepn { width: 36px; height: 36px; border-radius: 12px; background: var(--brand); color: white; display: grid; place-items: center; font-weight: 800; }
+  .arrow { align-self: center; color: #A9B2BC; font-size: 26px; }
+  .quote { background: white; border-radius: 18px; padding: 20px 24px; box-shadow: 0 10px 30px rgba(14,59,42,.08); margin-bottom: 16px; display: flex; gap: 18px; align-items: center; }
+  .quote .q { font-size: 21px; font-weight: 700; }
+  .quote .why { font-size: 16px; color: var(--muted); margin-top: 4px; }
+  .tag { font-size: 13px; font-weight: 800; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+  .hist { display: flex; align-items: flex-end; gap: 10px; height: 165px; }
+  .hist .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .hist .bar { width: 100%; border-radius: 10px 10px 4px 4px; position: relative; }
+  .hist .bar span { position: absolute; top: -24px; left: 0; right: 0; text-align: center; font-weight: 800; font-size: 16px; }
+  .hist .lbl { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .chip { display: inline-block; padding: 6px 14px; border-radius: 10px; font-weight: 700; font-size: 16px; margin: 4px 6px 4px 0; }
+</style>
+</head>
+<body>
+
+<!-- 1. Титул -->
+<section class="slide dark">
+  <img src="img/freedom-logo-white.svg" style="height:40px">
+  <div style="margin-top:120px">
+    <div class="kicker">Хакатон Freedom Broker · CQA</div>
+    <h1 style="font-size:58px;max-width:980px">ИИ проверяет качество разговоров <span class="grad">операторов</span></h1>
+    <p class="lead" style="font-size:24px;margin-top:10px">Система оценки чатов и звонков по чек-листу.<br>ИИ предлагает оценку и показывает доказательства, человек принимает решение.</p>
+  </div>
+  <p style="position:absolute;left:72px;bottom:56px;font-size:20px;font-weight:700">Команда EskaSeska</p>
+  <div class="num">1</div>
+</section>
+
+<!-- 2. Задача -->
+<section class="slide">
+  <div class="kicker">Задача</div>
+  <h1>Как понять, хорошо ли оператор <span class="grad">поговорил с клиентом</span></h1>
+  <p class="lead">Каждый день операторы ведут сотни чатов и звонков на трёх языках. Проверить качество нужно по чек-листу из 8 критериев.</p>
+  <div class="row" style="margin-top:44px">
+    <div class="card"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/></svg></div>
+      <h2>Очень много диалогов</h2><p>Чаты и звонки на русском, казахском и английском, с ботом и голосовым меню в начале.</p></div>
+    <div class="card"><div class="ic y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <h2>Вручную долго</h2><p>Человек успевает прослушать только малую часть разговоров. Остальные остаются без проверки.</p></div>
+    <div class="card"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg></div>
+      <h2>Риски не видны</h2><p>Грубость или раскрытие данных без проверки личности можно пропустить.</p></div>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">2</div>
+</section>
+
+<!-- 3. Решение -->
+<section class="slide">
+  <div class="kicker">Наше решение</div>
+  <h1>ИИ предлагает, <span class="grad">человек решает</span></h1>
+  <p class="lead">Мы сделали программу и сайт. Программа сама скачивает диалоги, ИИ оценивает их по чек-листу, а проверяющий смотрит результат и принимает решение.</p>
+  <div class="row" style="margin-top:44px">
+    <div class="card"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
+      <h2>Проверяет каждый диалог</h2><p>Все 8 критериев, балл от 0 до 100 и отдельный флаг грубой ошибки.</p></div>
+    <div class="card"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg></div>
+      <h2>Объясняет оценку</h2><p>По каждому критерию короткое объяснение и номера реплик-доказательств.</p></div>
+    <div class="card"><div class="ic v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></svg></div>
+      <h2>Человек решает</h2><p>Оценку можно оспорить. Финальное слово за проверяющим, оценка ИИ сохраняется рядом.</p></div>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">3</div>
+</section>
+
+<!-- 4. Как работает -->
+<section class="slide">
+  <div class="kicker">Как это работает</div>
+  <h1>Путь диалога: от API до <span class="grad">оценки на сайте</span></h1>
+  <div class="flow">
+    <div class="step"><div class="stepn">1</div><b>Загрузка</b><p>Программа сама берёт диалоги из API организаторов (DEV и PROD).</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="stepn">2</div><b>Подготовка</b><p>Нумерует все реплики с 1: клиент, оператор, бот, события.</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="stepn">3</div><b>ИИ оценивает</b><p>Gemini получает чек-лист и транскрипт и отвечает строго в формате JSON.</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="stepn">4</div><b>Проверка</b><p>Код проверяет ответ ИИ. Если что-то не так, спрашивает ещё раз.</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="stepn">5</div><b>Балл и сайт</b><p>Код считает балл и сохраняет results.json и данные для сайта.</p></div>
+  </div>
+  <div class="card" style="margin-top:34px;display:flex;gap:18px;align-items:center;flex:none">
+    <div class="ic g" style="margin:0;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+    <p style="font-size:19px;color:var(--text)"><b>Главная идея:</b> ИИ только оценивает критерии и объясняет. Итоговый балл считает обычный код по точной формуле, поэтому он всегда честный и одинаковый.</p>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">4</div>
+</section>
+
+<!-- 5. Чек-лист и формула -->
+<section class="slide">
+  <div class="kicker">Чек-лист и формула</div>
+  <h1>8 критериев и <span class="grad">понятная формула</span></h1>
+  <div class="row" style="margin-top:20px;align-items:flex-start">
+    <div style="flex:1.1">
+      <table>
+        <tr><td>Установление контакта</td><td style="width:42%"><div class="wbar" style="width:50%"></div></td><td><b>10</b></td></tr>
+        <tr><td>Выявление потребности</td><td><div class="wbar" style="width:75%"></div></td><td><b>15</b></td></tr>
+        <tr><td>Идентификация</td><td><div class="wbar" style="width:100%"></div></td><td><b>20</b></td></tr>
+        <tr><td>Корректность и полнота</td><td><div class="wbar" style="width:100%"></div></td><td><b>20</b></td></tr>
+        <tr><td>Эмпатия</td><td><div class="wbar" style="width:75%"></div></td><td><b>15</b></td></tr>
+        <tr><td>Ведение, скорость, грамотность</td><td><div class="wbar" style="width:75%"></div></td><td><b>15</b></td></tr>
+        <tr><td>Завершение</td><td><div class="wbar" style="width:25%"></div></td><td><b>5</b></td></tr>
+        <tr><td style="color:var(--red);font-weight:700">Грубые ошибки</td><td style="color:var(--muted)">отдельный флаг</td><td>—</td></tr>
+      </table>
+    </div>
+    <div style="flex:1">
+      <div class="formula">Итог = сумма (вес × доля) / сумма весов применимых критериев × 100</div>
+      <ul class="clean" style="margin-top:22px">
+        <li><span class="tick">✓</span><span>«Да» = 1, «Нет» = 0, шкалу делим на максимум</span></li>
+        <li><span class="tick">✓</span><span><b>N/A</b> — критерий не подходит к диалогу. Это не ноль: его вес делится между остальными</span></li>
+        <li><span class="tick">✓</span><span>Грубая ошибка не обнуляет балл, а подсвечивается руководителю</span></li>
+        <li><span class="tick">✓</span><span>Пример из гайда даёт ровно <b>85,38</b>, это проверяет тест</span></li>
+      </ul>
+    </div>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">5</div>
+</section>
+
+<!-- 6. Инструменты -->
+<section class="slide">
+  <div class="kicker">Инструменты</div>
+  <h1>Из чего <span class="grad">сделан проект</span></h1>
+  <div class="row" style="margin-top:30px">
+    <div class="card"><div class="ic b" style="font-weight:900;font-size:20px">Py</div><h2>Python</h2><p>Скрипт оценки, проверка ответа, формула балла, тесты и небольшой сервер для сайта. Без сложных фреймворков.</p></div>
+    <div class="card"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div><h2>Google Gemini</h2><p>ИИ, который оценивает диалоги, через бесплатный API. Можно заменить на Claude Opus 5.5 одной строкой в настройках.</p></div>
+    <div class="card"><div class="ic v" style="font-weight:900;font-size:18px">JS</div><h2>HTML, CSS, JavaScript</h2><p>Сайт для проверяющего без библиотек. Работает без интернета, графики нарисованы вручную.</p></div>
+  </div>
+  <div class="row" style="margin-top:24px">
+    <div class="card" style="display:flex;gap:16px;align-items:center"><div class="ic y" style="margin:0;flex-shrink:0;font-weight:900">API</div><p style="color:var(--text)"><b>API организаторов</b>: диалоги DEV и PROD, записи звонков</p></div>
+    <div class="card" style="display:flex;gap:16px;align-items:center"><div class="ic g" style="margin:0;flex-shrink:0;font-weight:900">Git</div><p style="color:var(--text)"><b>GitHub</b>: код и файлы результатов для жюри</p></div>
+    <div class="card" style="display:flex;gap:16px;align-items:center"><div class="ic b" style="margin:0;flex-shrink:0;font-weight:900">AI</div><p style="color:var(--text)"><b>ИИ-помощник Claude</b> помогал писать и объяснять код</p></div>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">6</div>
+</section>
+
+<!-- 7. Надёжность -->
+<section class="slide">
+  <div class="kicker">Надёжность</div>
+  <h1>ИИ может ошибиться, поэтому <span class="grad">мы всё проверяем</span></h1>
+  <div class="row" style="margin-top:28px">
+    <div style="flex:1">
+      <ul class="clean">
+        <li><span class="tick">1</span><span>ИИ отвечает строго в формате JSON по заданной схеме</span></li>
+        <li><span class="tick">2</span><span>Код проверяет: все 8 критериев на месте, значения допустимые, такие номера реплик есть</span></li>
+        <li><span class="tick">3</span><span>Плохой ответ: спрашиваем ИИ ещё раз, до 4 попыток</span></li>
+        <li><span class="tick">4</span><span>Не получилось: пишем «ошибка» с причиной, а не ставим ноль</span></li>
+      </ul>
+    </div>
+    <div style="flex:1">
+      <ul class="clean">
+        <li><span class="tick">5</span><span>Готовые ответы сохраняются: после сбоя продолжаем с того же места</span></li>
+        <li><span class="tick">6</span><span>У бесплатного Gemini лимит около 20 запросов в день на модель, поэтому программа сама переключается на другую модель</span></li>
+        <li><span class="tick">7</span><span>7 автотестов и проверка файла results.json по правилам гайда</span></li>
+      </ul>
+    </div>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">7</div>
+</section>
+
+<!-- 8. Результаты DEV -->
+<section class="slide">
+  <div class="kicker">Прогон на данных DEV</div>
+  <h1>65 диалогов из API <span class="grad">организаторов</span></h1>
+  <div class="row" style="margin-top:22px">
+    <div class="card"><div class="big">65<span style="font-size:30px;color:var(--muted)">/65</span></div><div class="small">оценено, ошибок 0</div></div>
+    <div class="card"><div class="big" style="color:var(--green-dark)">85,5</div><div class="small">средний балл</div></div>
+    <div class="card"><div class="big" style="color:var(--red)">5</div><div class="small">диалогов с грубой ошибкой</div></div>
+    <div class="card"><div class="big">~11<span style="font-size:30px;color:var(--muted)"> мин</span></div><div class="small">весь прогон</div></div>
+  </div>
+  <div class="row" style="margin-top:20px">
+    <div class="card" style="flex:1.6;padding:22px 26px">
+      <h2 style="margin-bottom:30px">Распределение баллов</h2>
+      <div class="hist">
+        <div class="col"><div class="bar" style="height:7%;background:#E66A5D"><span>2</span></div><div class="lbl">10–19</div></div>
+        <div class="col"><div class="bar" style="height:2%;background:#E66A5D"></div><div class="lbl">20–29</div></div>
+        <div class="col"><div class="bar" style="height:7%;background:#E66A5D"><span>2</span></div><div class="lbl">30–39</div></div>
+        <div class="col"><div class="bar" style="height:11%;background:#E66A5D"><span>3</span></div><div class="lbl">40–49</div></div>
+        <div class="col"><div class="bar" style="height:7%;background:#E66A5D"><span>2</span></div><div class="lbl">50–59</div></div>
+        <div class="col"><div class="bar" style="height:4%;background:#F0B53A"><span>1</span></div><div class="lbl">60–69</div></div>
+        <div class="col"><div class="bar" style="height:19%;background:#F0B53A"><span>5</span></div><div class="lbl">70–79</div></div>
+        <div class="col"><div class="bar" style="height:19%;background:#1CCC9E"><span>5</span></div><div class="lbl">80–89</div></div>
+        <div class="col"><div class="bar" style="height:67%;background:#02B140"><span>18</span></div><div class="lbl">90–99</div></div>
+        <div class="col"><div class="bar" style="height:100%;background:#02B140"><span>27</span></div><div class="lbl">100</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Что было в наборе</h2>
+      <p style="margin:10px 0 14px">60 чатов и 5 звонков с настоящими записями</p>
+      <span class="chip b">RU · 35</span><span class="chip" style="background:#DDF4F8;color:#007A93">KZ · 15</span><span class="chip v">EN · 15</span>
+      <p style="margin-top:16px">Модели: gemini-3.6-flash, gemini-3.8-flash, gemini-3.5-flash-lite</p>
+    </div>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">8</div>
+</section>
+
+<!-- 9. Что нашёл ИИ -->
+<section class="slide">
+  <div class="kicker">Что нашёл ИИ</div>
+  <h1>Грубые ошибки <span class="grad">с доказательствами</span></h1>
+  <div style="margin-top:26px">
+    <div class="quote"><span class="tag" style="background:var(--red-light);color:var(--red)">p1-ru-029</span>
+      <div><div class="q">«Вы вообще читать умеете? Бот всё написал.»</div><div class="why">Грубость оператора. ИИ указал реплику №10, балл 63, флаг грубой ошибки.</div></div></div>
+    <div class="quote"><span class="tag" style="background:var(--red-light);color:var(--red)">p1-ru-009</span>
+      <div><div class="q">«Я посмотрел: на вашем счёте есть ограничение на вывод.»</div><div class="why">Данные счёта раскрыты без проверки личности, хотя клиент сам об этом напомнил.</div></div></div>
+    <div class="quote"><span class="tag" style="background:var(--red-light);color:var(--red)">p1-ru-022</span>
+      <div><div class="q">«Скиньте деньги мне на карту»</div><div class="why">Оператор попросил перевести деньги на личную карту. Это серьёзное нарушение правил безопасности.</div></div></div>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">9</div>
+</section>
+
+<!-- 10. Сайт -->
+<section class="slide">
+  <div class="kicker">Продукт</div>
+  <h1 style="margin-bottom:22px">Сайт для <span class="grad">проверяющего</span></h1>
+  <div class="row" style="align-items:flex-start">
+    <img class="shot" src="img/shot_call.png" style="width:690px">
+    <ul class="clean" style="flex:1;margin-top:6px">
+      <li><span class="tick">✓</span><span><b>Диалоги</b>: все разговоры, фильтр «только нарушения»</span></li>
+      <li><span class="tick">✓</span><span><b>Разбор</b>: балл, объяснения, переход к реплике и плеер звонка</span></li>
+      <li><span class="tick">✓</span><span><b>Апелляции</b>: оспорить оценку и зафиксировать решение</span></li>
+      <li><span class="tick">✓</span><span><b>Чек-листы</b>: добавить критерий, поменять вес</span></li>
+      <li><span class="tick">✓</span><span><b>Аналитика</b>: графики и что улучшить</span></li>
+      <li><span class="tick">✓</span><span><b>Живая оценка</b>: новый диалог прямо при вас</span></li>
+    </ul>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">10</div>
+</section>
+
+<!-- 11. Польза и дальше -->
+<section class="slide">
+  <div class="kicker">Польза и планы</div>
+  <h1>Что это даёт <span class="grad">компании</span></h1>
+  <div class="row" style="margin-top:26px">
+    <div class="card"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></div><h2>Качество</h2><p>Проверяются все диалоги, а не выборка.</p></div>
+    <div class="card"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></div><h2>Риски</h2><p>Грубые ошибки видны сразу, с цитатой.</p></div>
+    <div class="card"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/></svg></div><h2>Сотрудники</h2><p>Каждая оценка — готовый разбор для обучения.</p></div>
+    <div class="card"><div class="ic v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></div><h2>Процессы</h2><p>Видно, что чинить: инструкцию, сервис или продукт.</p></div>
+  </div>
+  <div class="card" style="margin-top:24px;flex:none">
+    <h2>Что сделали бы дальше</h2>
+    <p>Сравнить оценки с экспертами и подстроить инструкцию для ИИ · анализ тона голоса в звонках · вход для сотрудников · локальная модель, чтобы данные клиентов не уходили наружу</p>
+  </div>
+  <img class="logo-small" src="img/freedom-logo.svg"><div class="num">11</div>
+</section>
+
+<!-- 12. Переход к демо -->
+<section class="slide dark">
+  <img src="img/freedom-logo-white.svg" style="height:34px">
+  <div style="margin-top:70px">
+    <div class="kicker">Демонстрация</div>
+    <h1 style="font-size:54px">Покажу, как это <span class="grad">работает вживую</span></h1>
+  </div>
+  <div class="row" style="margin-top:36px">
+    <ul class="clean" style="flex:1">
+      <li><span class="tick">1</span><span>Диалоги и фильтр «только нарушения»</span></li>
+      <li><span class="tick">2</span><span>Разбор диалога: балл, объяснения, переход к реплике</span></li>
+      <li><span class="tick">3</span><span>Звонок: плеер и дорожки «клиент / оператор»</span></li>
+    </ul>
+    <ul class="clean" style="flex:1">
+      <li><span class="tick">4</span><span>Апелляция и финальное решение человека</span></li>
+      <li><span class="tick">5</span><span>Чек-лист: новый критерий и вес</span></li>
+      <li><span class="tick">6</span><span>Живая оценка нового диалога и аналитика</span></li>
+    </ul>
+  </div>
+  <div class="num">12</div>
+</section>
+
+</body>
+</html>
