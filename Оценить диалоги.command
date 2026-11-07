@@ -36,8 +36,12 @@ fi
 echo ""
 echo "=== Шаг 3 из 3. Проверяю results/$SET/results.json по правилам гайда ==="
 if python3 validate.py "results/$SET/results.json"; then
-  git add "results/$SET/results.json" "web/data/dialogs_$SET.json" web/data/audio 2>/dev/null
-  git commit -q -m "Результаты $SET" && echo "Коммит сделан."
+  git add "results/$SET/results.json" "web/data/dialogs_$SET.json" web/data/audio cache 2>/dev/null
+  if git commit -q -m "Результаты $SET" >/dev/null 2>&1; then
+    echo "Коммит сделан."
+  else
+    echo "Коммит не нужен: эти результаты уже сохранены."
+  fi
   echo ""
   echo "ГОТОВО. Осталось открыть GitHub Desktop и нажать Push origin."
 else
