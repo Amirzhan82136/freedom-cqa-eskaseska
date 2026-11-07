@@ -91,8 +91,16 @@ def fetch_from_api(api_url, group_id):
     url = re.sub(r"group_id=[^&]*", "group_id=" + group_id, api_url)
     if "group_id=" not in url:
         url += "&group_id=" + group_id
-    response = requests.get(url, timeout=120)
-    response.raise_for_status()
+    try:
+        response = requests.get(url, timeout=120)
+    except requests.RequestException:
+        raise SystemExit("Не удалось связаться с API организаторов. Проверьте интернет и попробуйте ещё раз.")
+    # ссылку в сообщениях не показываем: в ней секретная подпись
+    if response.status_code == 404:
+        raise SystemExit("Набор с group_id=%s не найден в API организаторов. Проверьте значение group_id: "
+                         "для контрольного набора его сообщат организаторы." % group_id)
+    if response.status_code != 200:
+        raise SystemExit("API организаторов ответило ошибкой %d. Попробуйте ещё раз через минуту." % response.status_code)
     data = response.json()
     if isinstance(data, dict) and data.get("isSuccess") is False:
         raise SystemExit("API организаторов вернуло ошибку: %s" % data.get("error"))

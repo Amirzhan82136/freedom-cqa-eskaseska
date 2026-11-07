@@ -365,9 +365,11 @@ function setupLiveToolbar() {
   document.querySelectorAll("[data-run]").forEach((button) => button.addEventListener("click", async () => {
     const set = button.dataset.run;
     // для контрольного набора организаторы сообщат своё значение group_id
-    const groupId = prompt("Значение group_id для набора " + set.toUpperCase()
-      + " (для PROD его сообщат организаторы):", set.toUpperCase());
+    const groupId = prompt(set === "prod"
+      ? "Введите group_id контрольного набора — его сообщат организаторы:"
+      : "Значение group_id для набора DEV:", set === "prod" ? "" : "DEV");
     if (groupId === null) return;
+    if (!groupId.trim()) return showToast("Нужно ввести group_id, который дали организаторы");
     const answer = await postJson("/api/run", { set, group_id: groupId });
     if (answer.error) return showToast(answer.error);
     watchJob();
