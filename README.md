@@ -42,13 +42,22 @@ python3 validate.py results/dev/results.json
 
 **PROD (за час до конца), по порядку:**
 
+1. Получить 10 контрольных чатов: положить файлы (`.json`, `.jsonl` или `.csv`) в `data/prod/` или вписать адрес API в `.env` (подробно в [data/README.md](data/README.md)).
+2. Дважды щёлкнуть **«Оценить диалоги.command»** и написать `prod`. Он сам проверит, как прочитались чаты (`--check`), оценит их, проверит файл и сделает коммит.
+3. В GitHub Desktop нажать **Push origin**.
+
+То же самое вручную:
+
 ```bash
+python3 evaluate.py --set prod --check
 python3 evaluate.py --set prod
 python3 validate.py results/prod/results.json
 git add results/prod/results.json
 git commit -m "PROD результаты"
 git push
 ```
+
+`--check` ничего не оценивает и не тратит ключ: только показывает, сколько диалогов найдено и как распознаны реплики. Запускайте его первым.
 
 Если прогон оборвался, просто запустите ту же команду ещё раз. Уже оценённые диалоги берутся из кэша `cache/`, повторно модель не спрашивается.
 

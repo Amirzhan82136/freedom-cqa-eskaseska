@@ -6,3 +6,7 @@ __pycache__/
 cache/*
 !cache/demo.json
 !cache/demo-prod.json
+
+# данные организаторов в git не кладём, только результаты в results/
+data/dev/
+data/prod/

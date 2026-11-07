@@ -7,6 +7,7 @@
 #   python3 evaluate.py --set demo-prod  -> пример PROD для сайта (тоже демо)
 
 import argparse
+import csv
 import json
 import os
 import re
@@ -85,13 +86,35 @@ def fetch_from_api(api_url, set_name):
     return dialogs
 
 
+def read_csv_file(path):
+    """CSV, где каждая строка - одна реплика: conversation_id, role, text, ...
+    Реплики одного диалога собираем вместе в том порядке, как они идут в файле."""
+    dialogs = {}
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            dialog_id = first_of(row, ["conversation_id", "dialog_id", "id"])
+            if dialog_id not in dialogs:
+                dialogs[dialog_id] = {"conversation_id": dialog_id, "channel": row.get("channel", ""),
+                                      "language": row.get("language", ""), "turns": []}
+            dialogs[dialog_id]["turns"].append(row)
+    return list(dialogs.values())
+
+
 def read_local_files(folder):
-    """Прочитать все .json файлы из папки data/<набор>/."""
+    """Прочитать все файлы с диалогами из папки data/<набор>/: .json, .jsonl или .csv."""
     dialogs = []
     for name in sorted(os.listdir(folder)):
-        if name.endswith(".json") and name != "results.json":
-            with open(os.path.join(folder, name), encoding="utf-8") as f:
+        path = os.path.join(folder, name)
+        if name == "results.json":
+            continue
+        if name.endswith(".json"):
+            with open(path, encoding="utf-8-sig") as f:
                 dialogs.extend(pick_list(json.load(f)))
+        elif name.endswith(".jsonl"):
+            with open(path, encoding="utf-8-sig") as f:
+                dialogs.extend(json.loads(line) for line in f if line.strip())
+        elif name.endswith(".csv"):
+            dialogs.extend(read_csv_file(path))
     return dialogs
 
 
@@ -328,8 +351,14 @@ def check_answer(answer, turns_count):
             continue
         if not is_allowed_value(criterion_id, item.get("value")):
             problems.append("недопустимое значение %s = %r" % (criterion_id, item.get("value")))
-        for n in item.get("evidence_turns", []):
-            if not isinstance(n, int) or n < 1 or n > turns_count:
+        if not str(item.get("rationale", "")).strip():
+            problems.append("пустое объяснение (%s)" % criterion_id)
+        turns = item.get("evidence_turns")
+        if not isinstance(turns, list) or not turns:
+            problems.append("нет номеров реплик-доказательств (%s)" % criterion_id)
+            continue
+        for n in turns:
+            if not isinstance(n, int) or isinstance(n, bool) or n < 1 or n > turns_count:
                 problems.append("реплики №%s нет в диалоге (%s)" % (n, criterion_id))
     return problems
 
@@ -437,18 +466,60 @@ def prepare_audio(dialog):
         return None
 
 
+def check_input(set_name):
+    """Проверка входных данных: показать, как скрипт понял каждый диалог.
+    Запускать сразу после получения данных, чтобы до оценки увидеть проблемы с форматом."""
+    dialogs = load_dialogs(set_name)
+    print("Найдено диалогов:", len(dialogs))
+    if not dialogs:
+        raise SystemExit("Диалогов нет: положите файлы в data/%s/ или впишите CQA_API_URL в .env" % set_name)
+    problems = 0
+    for d in dialogs:
+        roles = {}
+        for t in d["turns"]:
+            roles[t["role"]] = roles.get(t["role"], 0) + 1
+        roles_text = ", ".join("%s: %d" % (ROLE_NAMES[r], n) for r, n in roles.items())
+        print("  %-24s %-5s %s  реплик: %-3d (%s)" % (
+            d["conversation_id"], d["channel"], d["language"], len(d["turns"]), roles_text))
+        if not d["conversation_id"]:
+            print("     ПРОБЛЕМА: нет conversation_id")
+            problems += 1
+        if not d["turns"]:
+            print("     ПРОБЛЕМА: не нашёл реплики (транскрипт)")
+            problems += 1
+        elif "operator" not in roles:
+            print("     ПРОБЛЕМА: не нашёл реплик оператора - проверьте, как в данных называется роль")
+            problems += 1
+    expected = EXPECTED_COUNT.get(set_name)
+    if expected and len(dialogs) != expected:
+        print("ВНИМАНИЕ: по гайду в %s должно быть %d диалогов, а найдено %d" % (set_name, expected, len(dialogs)))
+        problems += 1
+    if dialogs:
+        print("\nПример: так ИИ увидит первый диалог:\n")
+        print(format_transcript(dialogs[0])[:1500])
+    print("\nПроблем найдено:", problems)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Оценка диалогов операторов")
     parser.add_argument("--set", required=True, choices=["dev", "prod", "demo", "demo-prod"])
     parser.add_argument("--limit", type=int, default=0, help="оценить только первые N диалогов (для пробы)")
     parser.add_argument("--workers", type=int, default=4, help="сколько диалогов оценивать одновременно")
+    parser.add_argument("--check", action="store_true",
+                        help="только прочитать диалоги и показать, как они поняты (без ИИ и без ключа)")
     args = parser.parse_args()
+
+    if args.check:
+        check_input(args.set)
+        return
 
     if not args.set.startswith("demo") and not os.getenv("ANTHROPIC_API_KEY"):
         raise SystemExit("Нет ключа модели: впишите ANTHROPIC_API_KEY в файл .env (см. .env.example)")
 
     started = time.time()
     dialogs = load_dialogs(args.set)
+    if not dialogs:
+        raise SystemExit("Не найдено ни одного диалога. Проверьте папку data/%s/ или CQA_API_URL в .env" % args.set)
     if args.limit:
         dialogs = dialogs[:args.limit]
     print("Диалогов к оценке:", len(dialogs))
