@@ -1,0 +1,305 @@
+[
+  {
+    "conversation_id": "demo-chat-ru-01",
+    "channel": "chat",
+    "language": "ru",
+    "messages": [
+      {
+        "role": "bot",
+        "text": "Здравствуйте! Я виртуальный помощник Freedom Broker. Опишите ваш вопрос.",
+        "timestamp": "2026-10-10T10:00:00"
+      },
+      {
+        "role": "client",
+        "text": "Какая комиссия за покупку американских акций через приложение?",
+        "timestamp": "2026-10-10T10:00:20"
+      },
+      {
+        "role": "system",
+        "text": "Диалог передан оператору",
+        "timestamp": "2026-10-10T10:00:25"
+      },
+      {
+        "role": "operator",
+        "text": "Здравствуйте! Меня зовут Данияр, Freedom Broker. Сейчас подскажу.",
+        "timestamp": "2026-10-10T10:00:55"
+      },
+      {
+        "role": "operator",
+        "text": "Комиссия зависит от вашего тарифа. На тарифе «Стандарт» это 0,1% от суммы сделки, минимум 1,2 USD. Посмотреть свой тариф можно в приложении: Профиль → Тариф.",
+        "timestamp": "2026-10-10T10:01:40"
+      },
+      {
+        "role": "client",
+        "text": "А если сумма маленькая, например 50 долларов?",
+        "timestamp": "2026-10-10T10:02:10"
+      },
+      {
+        "role": "operator",
+        "text": "Тогда сработает минимальная комиссия 1,2 USD, потому что 0,1% от 50 USD меньше минимума. Понимаю, что для небольших сумм это ощутимо, поэтому многие клиенты покупают реже, но крупнее.",
+        "timestamp": "2026-10-10T10:02:50"
+      },
+      {
+        "role": "client",
+        "text": "Понятно, спасибо",
+        "timestamp": "2026-10-10T10:03:10"
+      },
+      {
+        "role": "operator",
+        "text": "Пожалуйста! Остались ли ещё вопросы? Хорошего дня!",
+        "timestamp": "2026-10-10T10:03:25"
+      }
+    ]
+  },
+  {
+    "conversation_id": "demo-chat-ru-02",
+    "channel": "chat",
+    "language": "ru",
+    "messages": [
+      {
+        "role": "client",
+        "text": "Добрый день, скажите сколько у меня денег на брокерском счёте? Номер договора 77-1043",
+        "timestamp": "2026-10-11T10:00:00"
+      },
+      {
+        "role": "operator",
+        "text": "Добрый день. На счёте 77-1043 сейчас 4 850 USD и 120 акций Apple.",
+        "timestamp": "2026-10-11T10:01:00"
+      },
+      {
+        "role": "client",
+        "text": "А почему так мало? Вчера было больше",
+        "timestamp": "2026-10-11T10:01:30"
+      },
+      {
+        "role": "operator",
+        "text": "Рынок упал, это не наша проблема.",
+        "timestamp": "2026-10-11T10:03:00"
+      },
+      {
+        "role": "client",
+        "text": "Можно как-то повежливее?",
+        "timestamp": "2026-10-11T10:03:20"
+      },
+      {
+        "role": "operator",
+        "text": "Я ответил на ваш вопрос.",
+        "timestamp": "2026-10-11T10:05:20"
+      },
+      {
+        "role": "system",
+        "text": "Клиент покинул чат",
+        "timestamp": "2026-10-11T10:05:50"
+      }
+    ]
+  },
+  {
+    "conversation_id": "demo-chat-kk-03",
+    "channel": "chat",
+    "language": "kk",
+    "messages": [
+      {
+        "role": "client",
+        "text": "Сәлеметсіз бе! Шотқа ақшаны қалай салуға болады?",
+        "timestamp": "2026-10-12T10:00:00"
+      },
+      {
+        "role": "operator",
+        "text": "Сәлеметсіз бе! Мен Айгерім, Freedom Broker. Қандай тәсілмен салғыңыз келеді: банк картасымен бе, әлде аударыммен бе?",
+        "timestamp": "2026-10-12T10:00:25"
+      },
+      {
+        "role": "client",
+        "text": "Картамен",
+        "timestamp": "2026-10-12T10:00:40"
+      },
+      {
+        "role": "operator",
+        "text": "Қосымшада «Шотты толтыру» бөліміне кіріп, «Карта» тәсілін таңдаңыз. Ақша әдетте бірнеше минут ішінде түседі. Комиссия жоқ.",
+        "timestamp": "2026-10-12T10:01:15"
+      },
+      {
+        "role": "client",
+        "text": "Рахмет!",
+        "timestamp": "2026-10-12T10:01:35"
+      },
+      {
+        "role": "operator",
+        "text": "Оқасы жоқ! Тағы сұрақтарыңыз болса, жазыңыз. Сау болыңыз!",
+        "timestamp": "2026-10-12T10:01:45"
+      }
+    ]
+  },
+  {
+    "conversation_id": "demo-chat-en-04",
+    "channel": "chat",
+    "language": "en",
+    "messages": [
+      {
+        "role": "client",
+        "text": "Hi, I can't log in to the app, it says my password is wrong",
+        "timestamp": "2026-10-13T10:00:00"
+      },
+      {
+        "role": "operator",
+        "text": "hello",
+        "timestamp": "2026-10-13T10:04:00"
+      },
+      {
+        "role": "client",
+        "text": "Can you help me reset it?",
+        "timestamp": "2026-10-13T10:04:30"
+      },
+      {
+        "role": "operator",
+        "text": "please tell me the code from sms that you just received so i can reset it",
+        "timestamp": "2026-10-13T10:07:50"
+      },
+      {
+        "role": "client",
+        "text": "Is that safe?",
+        "timestamp": "2026-10-13T10:08:10"
+      },
+      {
+        "role": "operator",
+        "text": "yes its fine just send it",
+        "timestamp": "2026-10-13T10:10:40"
+      },
+      {
+        "role": "client",
+        "text": "I'll try the reset button myself, bye",
+        "timestamp": "2026-10-13T10:11:20"
+      }
+    ]
+  },
+  {
+    "conversation_id": "demo-call-ru-05",
+    "channel": "call",
+    "language": "ru",
+    "audio_url": "data/demo/audio/demo-call-ru-05.m4a",
+    "transcript": [
+      {
+        "speaker": "system",
+        "text": "Звонок принят, запись разговора включена",
+        "start": 0.4,
+        "end": 0.4
+      },
+      {
+        "speaker": "operator",
+        "text": "Freedom Broker, добрый день! Меня зовут Алия. Чем могу помочь?",
+        "start": 0.4,
+        "end": 4.98
+      },
+      {
+        "speaker": "client",
+        "text": "Здравствуйте. Я хочу вывести деньги с брокерского счёта на карту.",
+        "start": 5.68,
+        "end": 9.39
+      },
+      {
+        "speaker": "operator",
+        "text": "Конечно, помогу. Для начала назовите, пожалуйста, ваш ИИН и кодовое слово.",
+        "start": 10.09,
+        "end": 15.5
+      },
+      {
+        "speaker": "client",
+        "text": "ИИН девятьсот девяносто, ноль один, ноль один. Кодовое слово — ласточка.",
+        "start": 16.2,
+        "end": 20.84
+      },
+      {
+        "speaker": "operator",
+        "text": "Спасибо, данные совпали. Какую сумму хотите вывести и на какую карту?",
+        "start": 21.54,
+        "end": 26.4
+      },
+      {
+        "speaker": "client",
+        "text": "Пятьсот долларов, на карту Фридом Банка.",
+        "start": 27.1,
+        "end": 29.42
+      },
+      {
+        "speaker": "operator",
+        "text": "Подаю заявку. Деньги поступят в течение одного рабочего дня. Комиссии за вывод на карту Фридом Банка нет.",
+        "start": 30.12,
+        "end": 36.87
+      },
+      {
+        "speaker": "client",
+        "text": "Отлично, спасибо.",
+        "start": 37.57,
+        "end": 38.93
+      },
+      {
+        "speaker": "operator",
+        "text": "Пожалуйста! Могу ещё чем-нибудь помочь? Хорошего дня, до свидания!",
+        "start": 39.63,
+        "end": 44.5
+      }
+    ]
+  },
+  {
+    "conversation_id": "demo-call-ru-06",
+    "channel": "call",
+    "language": "ru",
+    "audio_url": "data/demo/audio/demo-call-ru-06.m4a",
+    "transcript": [
+      {
+        "speaker": "operator",
+        "text": "Алло, слушаю.",
+        "start": 0.4,
+        "end": 1.56
+      },
+      {
+        "speaker": "client",
+        "text": "Здравствуйте. Мне пришло уведомление о маржин колле. Что это значит и что мне делать?",
+        "start": 2.26,
+        "end": 7.34
+      },
+      {
+        "speaker": "operator",
+        "text": "Ну это когда денег не хватает.",
+        "start": 8.04,
+        "end": 9.97
+      },
+      {
+        "speaker": "client",
+        "text": "А что конкретно мне сделать, чтобы позиции не закрыли?",
+        "start": 10.67,
+        "end": 13.76
+      },
+      {
+        "speaker": "operator",
+        "text": "Пополните счёт и всё.",
+        "start": 14.46,
+        "end": 15.79
+      },
+      {
+        "speaker": "client",
+        "text": "А сколько нужно пополнить?",
+        "start": 16.49,
+        "end": 17.91
+      },
+      {
+        "speaker": "operator",
+        "text": "Посмотрите в приложении.",
+        "start": 18.61,
+        "end": 20.14
+      },
+      {
+        "speaker": "client",
+        "text": "Ладно, спасибо.",
+        "start": 20.84,
+        "end": 22.08
+      },
+      {
+        "speaker": "operator",
+        "text": "До свидания.",
+        "start": 22.78,
+        "end": 23.69
+      }
+    ]
+  }
+]

@@ -1,0 +1,487 @@
+{
+  "schema_version": "1.0",
+  "team_name": "EskaSeska",
+  "model": {
+    "mode": "external_api",
+    "name": "демо-разметка вручную (без ИИ)"
+  },
+  "results": [
+    {
+      "conversation_id": "demo-chat-ru-01",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "Оператор поздоровался, назвал имя и компанию.",
+          "evidence_turns": [
+            4
+          ]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "Клиент сразу чётко сформулировал вопрос о комиссии, уточнять было нечего.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "Общий вопрос о тарифах не требует идентификации.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "Назвал комиссию, минимум и где посмотреть тариф; разобрал пример клиента.",
+          "evidence_turns": [
+            5,
+            7
+          ]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "Признал, что для небольших сумм комиссия ощутима, и дал совет.",
+          "evidence_turns": [
+            7
+          ]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "Ответы быстрые, по делу и грамотные.",
+          "evidence_turns": [
+            4,
+            5,
+            7
+          ]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "Уточнил, остались ли вопросы, и попрощался.",
+          "evidence_turns": [
+            9
+          ]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "Грубых нарушений нет.",
+          "evidence_turns": [
+            4,
+            5,
+            7,
+            9
+          ]
+        }
+      ],
+      "score": {
+        "final_score": 100.0,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "demo-chat-ru-02",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": false,
+          "rationale": "Оператор поздоровался, но не представился.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": null,
+          "rationale": "Клиент сразу ясно спросил про остаток на счёте.",
+          "evidence_turns": [
+            1
+          ]
+        },
+        {
+          "criterion_id": "identification",
+          "value": false,
+          "rationale": "Назвал остаток по номеру договора без проверки личности клиента.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 5,
+          "rationale": "Остаток назвал, но на вопрос о причине снижения ответил отпиской.",
+          "evidence_turns": [
+            2,
+            4
+          ]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "Ответил грубо («это не наша проблема»), проигнорировал недовольство клиента.",
+          "evidence_turns": [
+            4,
+            6
+          ]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 4,
+          "rationale": "Долгие паузы до 2 минут, короткие резкие ответы.",
+          "evidence_turns": [
+            2,
+            4,
+            6
+          ]
+        },
+        {
+          "criterion_id": "closure",
+          "value": null,
+          "rationale": "Клиент сам покинул чат, оператор не мог завершить диалог.",
+          "evidence_turns": [
+            7
+          ]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "Раскрыл данные счёта без идентификации и нагрубил клиенту.",
+          "evidence_turns": [
+            2,
+            4
+          ]
+        }
+      ],
+      "score": {
+        "final_score": 13.75,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "demo-chat-kk-03",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "Поздоровался на казахском, назвал имя и компанию.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "Уточнил удобный способ пополнения: карта или перевод.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "Общий вопрос о пополнении не требует идентификации.",
+          "evidence_turns": [
+            1
+          ]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 15,
+          "rationale": "Объяснил, где пополнить и сроки, но не упомянул лимиты по карте.",
+          "evidence_turns": [
+            4
+          ]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "Доброжелательный тон, предложил писать при новых вопросах.",
+          "evidence_turns": [
+            2,
+            6
+          ]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "Отвечал быстро, понятно и грамотно.",
+          "evidence_turns": [
+            2,
+            4
+          ]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "Предложил дальнейшую помощь и попрощался.",
+          "evidence_turns": [
+            6
+          ]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "Грубых нарушений нет.",
+          "evidence_turns": [
+            2,
+            4,
+            6
+          ]
+        }
+      ],
+      "score": {
+        "final_score": 93.75,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "demo-chat-en-04",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": false,
+          "rationale": "Написал только «hello» без представления и через 4 минуты.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": false,
+          "rationale": "Не выяснил, в чём проблема со входом, сразу перешёл к сбросу.",
+          "evidence_turns": [
+            2,
+            4
+          ]
+        },
+        {
+          "criterion_id": "identification",
+          "value": false,
+          "rationale": "Не провёл идентификацию по правилам, вместо этого попросил код из SMS.",
+          "evidence_turns": [
+            4
+          ]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 0,
+          "rationale": "Дал опасный совет сообщить код из SMS, проблему не решил.",
+          "evidence_turns": [
+            4,
+            6
+          ]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "Проигнорировал сомнения клиента о безопасности.",
+          "evidence_turns": [
+            5,
+            6
+          ]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 0,
+          "rationale": "Паузы 3-4 минуты, ошибки в тексте, диалог не ведётся.",
+          "evidence_turns": [
+            2,
+            4,
+            6
+          ]
+        },
+        {
+          "criterion_id": "closure",
+          "value": false,
+          "rationale": "Не попрощался и не предложил помощь, клиент ушёл сам.",
+          "evidence_turns": [
+            7
+          ]
+        },
+        {
+          "criterion_id": "critical",
+          "value": true,
+          "rationale": "Попросил у клиента код из SMS — грубое нарушение безопасности.",
+          "evidence_turns": [
+            4,
+            6
+          ]
+        }
+      ],
+      "score": {
+        "final_score": 0.0,
+        "critical_flag": true
+      }
+    },
+    {
+      "conversation_id": "demo-call-ru-05",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": true,
+          "rationale": "Назвал компанию, поздоровался и представился.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": true,
+          "rationale": "Уточнил сумму и карту для вывода.",
+          "evidence_turns": [
+            6
+          ]
+        },
+        {
+          "criterion_id": "identification",
+          "value": true,
+          "rationale": "Проверил ИИН и кодовое слово до выполнения операции.",
+          "evidence_turns": [
+            4,
+            6
+          ]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 20,
+          "rationale": "Оформил заявку, назвал сроки и отсутствие комиссии.",
+          "evidence_turns": [
+            8
+          ]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": true,
+          "rationale": "Вежливый, внимательный тон на протяжении звонка.",
+          "evidence_turns": [
+            4,
+            10
+          ]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 10,
+          "rationale": "Разговор вёл уверенно, без пауз и лишних повторов.",
+          "evidence_turns": [
+            2,
+            6,
+            8
+          ]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "Предложил дальнейшую помощь и попрощался.",
+          "evidence_turns": [
+            10
+          ]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "Грубых нарушений нет.",
+          "evidence_turns": [
+            4,
+            8
+          ]
+        }
+      ],
+      "score": {
+        "final_score": 100.0,
+        "critical_flag": false
+      }
+    },
+    {
+      "conversation_id": "demo-call-ru-06",
+      "status": "ok",
+      "criteria": [
+        {
+          "criterion_id": "contact",
+          "value": false,
+          "rationale": "Ответил «Алло, слушаю» без приветствия и представления.",
+          "evidence_turns": [
+            1
+          ]
+        },
+        {
+          "criterion_id": "discovery",
+          "value": false,
+          "rationale": "Не уточнил, по какой позиции маржин-колл и какой счёт.",
+          "evidence_turns": [
+            3
+          ]
+        },
+        {
+          "criterion_id": "identification",
+          "value": null,
+          "rationale": "Объяснение термина не требует идентификации.",
+          "evidence_turns": [
+            2
+          ]
+        },
+        {
+          "criterion_id": "consultation",
+          "value": 5,
+          "rationale": "Объяснение поверхностное, не назвал сумму пополнения и риски закрытия позиций.",
+          "evidence_turns": [
+            3,
+            5,
+            7
+          ]
+        },
+        {
+          "criterion_id": "empathy",
+          "value": false,
+          "rationale": "Не проявил участия к тревоге клиента, отвечал отрывисто.",
+          "evidence_turns": [
+            3,
+            7
+          ]
+        },
+        {
+          "criterion_id": "dialogue",
+          "value": 4,
+          "rationale": "Ответы односложные, клиенту пришлось переспрашивать.",
+          "evidence_turns": [
+            3,
+            5,
+            7
+          ]
+        },
+        {
+          "criterion_id": "closure",
+          "value": true,
+          "rationale": "Попрощался в конце разговора.",
+          "evidence_turns": [
+            9
+          ]
+        },
+        {
+          "criterion_id": "critical",
+          "value": false,
+          "rationale": "Ответы слабые, но грубых нарушений нет.",
+          "evidence_turns": [
+            3,
+            5,
+            7
+          ]
+        }
+      ],
+      "score": {
+        "final_score": 20.0,
+        "critical_flag": false
+      }
+    }
+  ]
+}
