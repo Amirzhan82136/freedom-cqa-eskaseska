@@ -655,7 +655,7 @@ function scoreCardsHtml(d) {
   return `
     <div class="card">
       <h2>Оценка качества</h2>
-      ${values.critical ? '<div class="critical-alert">${icon("alert")} Выявлено грубое нарушение. Балл не обнулён, но диалог требует внимания руководителя.</div>' : ""}
+      ${values.critical ? `<div class="critical-alert">${icon("alert")} Выявлено грубое нарушение. Балл не обнулён, но диалог требует внимания руководителя.</div>` : ""}
       <div class="score-head">
         <div class="ring">
           <svg width="136" height="136">
