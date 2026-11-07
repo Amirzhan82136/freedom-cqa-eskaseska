@@ -13,10 +13,13 @@ if [ "$SET" != "dev" ] && [ "$SET" != "prod" ]; then
   exit 1
 fi
 mkdir -p "data/$SET"
+GROUP_ID=$(echo "$SET" | tr a-z A-Z)
+read -p "Значение group_id для API (Enter = $GROUP_ID; для PROD его сообщат организаторы): " ANSWER
+if [ -n "$ANSWER" ]; then GROUP_ID="$ANSWER"; fi
 
 echo ""
 echo "=== Шаг 1 из 3. Проверяю, как прочитались диалоги ==="
-if ! python3 evaluate.py --set "$SET" --check; then
+if ! python3 evaluate.py --set "$SET" --group-id "$GROUP_ID" --check; then
   read -p "Нажмите Enter, чтобы закрыть окно"
   exit 1
 fi
@@ -25,7 +28,7 @@ read -p "Если всё выглядит правильно, нажмите Ent
 
 echo ""
 echo "=== Шаг 2 из 3. Оцениваю диалоги с помощью ИИ ==="
-if ! python3 evaluate.py --set "$SET"; then
+if ! python3 evaluate.py --set "$SET" --group-id "$GROUP_ID"; then
   read -p "Нажмите Enter, чтобы закрыть окно"
   exit 1
 fi

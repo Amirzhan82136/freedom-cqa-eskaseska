@@ -26,14 +26,14 @@ from checklist import CRITERIA, load_active_checklist, save_active_checklist
 job = {"running": False, "set": None, "done": 0, "total": 0, "errors": 0, "message": "", "summary": None}
 
 
-def run_job(set_name):
+def run_job(set_name, group_id=None):
     """Оценка целого набора в фоне, чтобы сайт не зависал."""
     def on_progress(done, total, errors):
         job.update(done=done, total=total, errors=errors, message="Оцениваю диалоги...")
 
     try:
         job["message"] = "Скачиваю диалоги..."
-        job["summary"] = evaluate.run_set(set_name, on_progress=on_progress)
+        job["summary"] = evaluate.run_set(set_name, on_progress=on_progress, group_id=group_id)
         job["message"] = "Готово"
     except SystemExit as error:          # понятные ошибки: нет ключа, нет данных
         job["message"] = str(error)
@@ -156,7 +156,8 @@ class Handler(SimpleHTTPRequestHandler):
             if job["running"]:
                 return self.send_json({"error": "Уже идёт оценка набора " + str(job["set"])}, 409)
             job.update(running=True, set=set_name, done=0, total=0, errors=0, message="Запускаю...", summary=None)
-            threading.Thread(target=run_job, args=(set_name,), daemon=True).start()
+            group_id = str(body.get("group_id") or "").strip() or None
+            threading.Thread(target=run_job, args=(set_name, group_id), daemon=True).start()
             self.send_json({"ok": True})
         elif path == "/api/evaluate":
             try:

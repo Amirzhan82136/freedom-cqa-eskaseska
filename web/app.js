@@ -364,8 +364,11 @@ function setupLiveToolbar() {
   newButton.addEventListener("click", openNewDialogModal);
   document.querySelectorAll("[data-run]").forEach((button) => button.addEventListener("click", async () => {
     const set = button.dataset.run;
-    if (!confirm("Скачать набор " + set.toUpperCase() + " из API организаторов и оценить его ИИ? Это займёт несколько минут.")) return;
-    const answer = await postJson("/api/run", { set });
+    // для контрольного набора организаторы сообщат своё значение group_id
+    const groupId = prompt("Значение group_id для набора " + set.toUpperCase()
+      + " (для PROD его сообщат организаторы):", set.toUpperCase());
+    if (groupId === null) return;
+    const answer = await postJson("/api/run", { set, group_id: groupId });
     if (answer.error) return showToast(answer.error);
     watchJob();
   }));

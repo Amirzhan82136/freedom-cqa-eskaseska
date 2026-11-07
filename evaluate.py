@@ -80,13 +80,13 @@ def pick_list(data):
     return pick_list(inner)
 
 
-def fetch_from_api(api_url, set_name):
-    """Скачать диалоги из API организаторов.
-    CQA_API_URL - полная ссылка из чата организаторов. Набор выбирается параметром
-    group_id: DEV или PROD (в ссылке подставляем нужный)."""
-    url = re.sub(r"group_id=[^&]*", "group_id=" + set_name.upper(), api_url)
+def fetch_from_api(api_url, group_id):
+    """Скачать диалоги из API организаторов (GET с параметром group_id).
+    CQA_API_URL - ссылка «Открыть GET для DEV» из задания. Для контрольного набора
+    организаторы сообщат своё значение group_id - его подставляем вместо DEV."""
+    url = re.sub(r"group_id=[^&]*", "group_id=" + group_id, api_url)
     if "group_id=" not in url:
-        url += "&group_id=" + set_name.upper()
+        url += "&group_id=" + group_id
     response = requests.get(url, timeout=120)
     response.raise_for_status()
     data = response.json()
@@ -228,13 +228,22 @@ def normalize_dialog(raw):
     }
 
 
-def load_dialogs(set_name):
+def group_id_for(set_name, group_id=None):
+    """Какой group_id спрашивать у API: явно заданный, из .env (CQA_GROUP_ID_PROD) или DEV/PROD."""
+    if group_id:
+        return group_id
+    return os.getenv("CQA_GROUP_ID_" + set_name.upper()) or set_name.upper()
+
+
+def load_dialogs(set_name, group_id=None):
     """Получить диалоги: из API (если задан CQA_API_URL) или из папки data/<набор>/."""
     api_url = os.getenv("CQA_API_URL")
     folder = os.path.join("data", set_name)
     if api_url and not set_name.startswith("demo"):
         print("Скачиваю диалоги из API организаторов (набор %s)" % set_name.upper())
-        raw = fetch_from_api(api_url, set_name)
+        group_id = group_id_for(set_name, group_id)
+        print("group_id =", group_id)
+        raw = fetch_from_api(api_url, group_id)
         os.makedirs(folder, exist_ok=True)
         with open(os.path.join(folder, "api_dump.json"), "w", encoding="utf-8") as f:
             json.dump(raw, f, ensure_ascii=False, indent=2)   # копия на всякий случай
@@ -309,7 +318,8 @@ def build_system_prompt(criteria=CRITERIA):
         "Сомнения и мелкие недочёты - это не грубая ошибка.",
         "5. evidence_turns - номера реплик-доказательств из квадратных скобок [N]. "
         "Нумерация уже сделана по всему диалогу, не пересчитывай её. Указывай 1-4 самых важных номера, "
-        "по возможности - реплики оператора.",
+        "по возможности - реплики оператора. Список никогда не пустой: если грубых ошибок нет (critical = false), "
+        "укажи главные реплики оператора, которые ты проверил.",
         "6. rationale - 1-2 коротких предложения ПО-РУССКИ, даже если диалог на казахском или английском. "
         "Если балл снижен, напиши конкретно, чего не хватило.",
         "7. Язык диалога (русский, казахский, английский) сам по себе не влияет на оценку.",
@@ -440,6 +450,15 @@ def check_answer(answer, turns_count, criteria=CRITERIA):
     return problems
 
 
+def fill_critical_evidence(answer, dialog):
+    """Если ИИ не нашёл грубых ошибок и не указал реплики, берём первые реплики оператора:
+    именно их и проверяли на нарушения (гайд просит номера реплик у каждого критерия)."""
+    item = answer.get("critical")
+    if isinstance(item, dict) and item.get("value") is False and not item.get("evidence_turns"):
+        item["evidence_turns"] = [t["n"] for t in dialog["turns"] if t["role"] == "operator"][:4] or [1]
+    return answer
+
+
 def build_result(dialog_id, answer, criteria=CRITERIA):
     """Собрать запись для results.json из проверенного ответа модели."""
     items = []
@@ -484,6 +503,7 @@ def evaluate_dialog(dialog, cache=None, cache_path=None, criteria=CRITERIA):
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
             answer, model_name = ask_model(dialog, criteria)
+            answer = fill_critical_evidence(answer, dialog)
             problems = check_answer(answer, turns_count, criteria)
             if not problems:
                 if cache is not None:
@@ -496,8 +516,8 @@ def evaluate_dialog(dialog, cache=None, cache_path=None, criteria=CRITERIA):
             last_error = "Ошибка запроса к модели: %s" % error
         with lock:
             print("  [%s] попытка %d не удалась: %s" % (dialog_id, attempt, last_error[:200]))
-        if "429" in last_error or "RESOURCE_EXHAUSTED" in last_error:
-            time.sleep(30 * attempt)    # упёрлись в лимит бесплатного тарифа - ждём подольше
+        if any(code in last_error for code in ["429", "RESOURCE_EXHAUSTED", "503", "UNAVAILABLE"]):
+            time.sleep(30 * attempt)    # лимит бесплатного тарифа или модель перегружена - ждём подольше
         else:
             time.sleep(2 * attempt)
     return error_result(dialog_id, last_error), None
@@ -555,10 +575,10 @@ def prepare_audio(dialog):
         return None
 
 
-def check_input(set_name):
+def check_input(set_name, group_id=None):
     """Проверка входных данных: показать, как скрипт понял каждый диалог.
     Запускать сразу после получения данных, чтобы до оценки увидеть проблемы с форматом."""
-    dialogs = load_dialogs(set_name)
+    dialogs = load_dialogs(set_name, group_id)
     print("Найдено диалогов:", len(dialogs))
     if not dialogs:
         raise SystemExit("Диалогов нет: положите файлы в data/%s/ или впишите CQA_API_URL в .env" % set_name)
@@ -589,7 +609,7 @@ def check_input(set_name):
     print("\nПроблем найдено:", problems)
 
 
-def run_set(set_name, limit=0, workers=WORKERS, on_progress=None):
+def run_set(set_name, limit=0, workers=WORKERS, on_progress=None, group_id=None):
     """Оценить весь набор: загрузка -> ИИ -> проверка -> балл -> results.json и данные для сайта.
     on_progress(готово, всего, ошибок) вызывается после каждого диалога (для полосы прогресса на сайте).
     Возвращает словарь с итогами."""
@@ -597,7 +617,7 @@ def run_set(set_name, limit=0, workers=WORKERS, on_progress=None):
         raise SystemExit(no_key_message())
 
     started = time.time()
-    dialogs = load_dialogs(set_name)
+    dialogs = load_dialogs(set_name, group_id)
     if not dialogs:
         raise SystemExit("Не найдено ни одного диалога. Проверьте папку data/%s/ или CQA_API_URL в .env" % set_name)
     if limit:
@@ -687,12 +707,13 @@ def main():
     parser.add_argument("--workers", type=int, default=WORKERS, help="сколько диалогов оценивать одновременно")
     parser.add_argument("--check", action="store_true",
                         help="только прочитать диалоги и показать, как они поняты (без ИИ и без ключа)")
+    parser.add_argument("--group-id", help="group_id для API организаторов (для PROD его сообщат организаторы)")
     args = parser.parse_args()
 
     if args.check:
-        check_input(args.set)
+        check_input(args.set, args.group_id)
     else:
-        run_set(args.set, args.limit, args.workers)
+        run_set(args.set, args.limit, args.workers, group_id=args.group_id)
 
 
 if __name__ == "__main__":
