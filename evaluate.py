@@ -443,6 +443,9 @@ def main():
     parser.add_argument("--workers", type=int, default=4, help="сколько диалогов оценивать одновременно")
     args = parser.parse_args()
 
+    if args.set != "demo" and not os.getenv("ANTHROPIC_API_KEY"):
+        raise SystemExit("Нет ключа модели: впишите ANTHROPIC_API_KEY в файл .env (см. .env.example)")
+
     started = time.time()
     dialogs = load_dialogs(args.set)
     if args.limit:
@@ -494,7 +497,7 @@ def main():
             "result": result,
         })
     save_json(os.path.join("web", "data", "dialogs_%s.json" % args.set),
-              {"set": args.set, "model": report["model"], "dialogs": web_dialogs})
+              {"set": args.set, "model": report["model"], "checklist": CRITERIA, "dialogs": web_dialogs})
 
     # итоги прогона
     ok = [r for r in results if r["status"] == "ok"]

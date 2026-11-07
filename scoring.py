@@ -1,6 +1,8 @@
 # Подсчёт итогового балла. Балл считает этот код, а не ИИ.
 # Такая же формула повторена в web/app.js (функция calcScore).
 
+import math
+
 from checklist import get_criterion
 
 # Максимум шкалы для числовых критериев
@@ -35,7 +37,9 @@ def calc_score(values):
     if total_weight == 0:
         final_score = 0.0   # все критерии N/A - на практике не бывает (contact всегда есть)
     else:
-        final_score = round(total / total_weight * 100, 2)
+        # округляем "по-школьному" (0.5 вверх), ровно так же, как в app.js,
+        # чтобы сайт и Python всегда давали одинаковый балл
+        final_score = math.floor(total / total_weight * 100 * 100 + 0.5) / 100
 
     return {
         "final_score": final_score,

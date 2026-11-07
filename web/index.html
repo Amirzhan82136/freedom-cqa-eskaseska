@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CQA · Контроль качества диалогов</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Боковое меню -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">Q</div>
+      <div>
+        <div class="logo-title">CQA</div>
+        <div class="logo-sub">Freedom Broker</div>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <a href="#dialogs" data-view="dialogs"><span class="icon">💬</span>Диалоги</a>
+      <a href="#checklist" data-view="checklist"><span class="icon">✅</span>Чек-листы</a>
+      <a href="#appeals" data-view="appeals"><span class="icon">⚖️</span>Апелляции <span id="appeals-count" class="menu-badge"></span></a>
+      <a href="#analytics" data-view="analytics"><span class="icon">📊</span>Аналитика</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <label class="set-label" for="set-select">Набор данных</label>
+      <select id="set-select"></select>
+      <div id="model-name" class="model-name"></div>
+      <div class="human-note">Оценку предложил ИИ.<br>Решение принимает человек.</div>
+    </div>
+  </aside>
+
+  <!-- Основная часть: сюда app.js рисует нужный раздел -->
+  <main id="app" class="main">
+    <div class="loading">Загрузка данных…</div>
+  </main>
+
+  <!-- Окно "Оспорить оценку" -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Оспорить оценку</h3>
+      <p class="muted" id="modal-dialog-id"></p>
+      <label>Критерий
+        <select id="appeal-criterion"></select>
+      </label>
+      <div class="ai-value-line">Оценка ИИ: <b id="appeal-ai-value"></b></div>
+      <label>Какое значение вы считаете верным
+        <select id="appeal-value"></select>
+      </label>
+      <label>Комментарий
+        <textarea id="appeal-comment" rows="3" placeholder="Почему оценка неверна? Например: оператор представился в реплике 3"></textarea>
+      </label>
+      <div class="modal-buttons">
+        <button class="btn" id="appeal-cancel">Отмена</button>
+        <button class="btn btn-primary" id="appeal-save">Отправить апелляцию</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1024 @@
+// =====================================================================
+// CQA — сайт проверки качества диалогов. Чистый JavaScript, без библиотек.
+// Данные берутся из web/data/dialogs_<набор>.json (их создаёт evaluate.py).
+// Апелляции и решения проверяющего хранятся в localStorage браузера.
+// =====================================================================
+
+const SETS = ["dev", "prod", "demo"];          // какие наборы пробуем загрузить
+const SCALE_MAX = { consultation: 20, dialogue: 10 };
+const LANGUAGES = { ru: "Русский", kk: "Қазақша", en: "English" };
+const ROLES = { client: "Клиент", operator: "Оператор", bot: "Бот", event: "Событие" };
+
+let data = null;          // загруженный набор: { set, model, checklist, dialogs }
+let available = {};       // какие наборы нашлись: { dev: данные, ... }
+let CRITERIA = [];        // чек-лист (приходит из того же файла, что и диалоги)
+let filters = { onlyCritical: false, onlyErrors: false, language: "all", channel: "all", search: "" };
+let appealTab = "all";
+
+// ---------- Хранилище (localStorage может быть недоступен — тогда просто не сохраняем) ----------
+function loadStored(key, fallback) {
+  try {
+    const text = localStorage.getItem(key);
+    return text ? JSON.parse(text) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+function saveStored(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ничего */ }
+}
+let appeals = loadStored("cqa_appeals", []);       // список апелляций
+let confirmed = loadStored("cqa_confirmed", {});   // "набор:id" -> оценку подтвердил человек
+
+// =====================================================================
+// Формула балла — ТА ЖЕ, что в scoring.py
+// =====================================================================
+function criterionShare(id, value) {
+  if (id in SCALE_MAX) return value / SCALE_MAX[id];
+  return value === true ? 1 : 0;
+}
+
+function calcScore(values) {
+  let total = 0;
+  let totalWeight = 0;
+  for (const c of CRITERIA) {
+    const value = values[c.id];
+    if (c.id === "critical") continue;      // грубые ошибки в сумму не входят
+    if (value === null || value === undefined) continue;   // N/A — вес "растворяется"
+    total += c.weight * criterionShare(c.id, value);
+    totalWeight += c.weight;
+  }
+  let finalScore = 0;
+  if (totalWeight > 0) {
+    finalScore = Math.floor(total / totalWeight * 100 * 100 + 0.5) / 100;  // как в Python
+  }
+  return { final_score: finalScore, critical_flag: values.critical === true };
+}
+
+// =====================================================================
+// Небольшие помощники
+// =====================================================================
+function esc(text) {
+  return String(text ?? "").replace(/[&<>"']/g, (ch) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+function fmtNum(x) {
+  return Number(x).toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+}
+function fmtTime(seconds) {
+  seconds = Math.floor(seconds);
+  return String(Math.floor(seconds / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0");
+}
+function turnTime(turn) {
+  if (turn.start !== null && turn.start !== undefined) return fmtTime(turn.start);
+  if (turn.time_label && turn.time_label.includes("T")) return turn.time_label.split("T")[1].slice(0, 8);
+  return turn.time_label || "";
+}
+function valueLabel(value) {
+  if (value === true) return "Да";
+  if (value === false) return "Нет";
+  if (value === null || value === undefined) return "N/A";
+  return String(value);
+}
+function scoreClass(score) {
+  if (score >= 80) return "good";
+  if (score >= 60) return "mid";
+  return "bad";
+}
+function shareClass(share) {
+  if (share >= 1) return "good";
+  if (share >= 0.5) return "mid";
+  return "bad";
+}
+function shareColor(share) {
+  return { good: "var(--green)", mid: "var(--yellow)", bad: "var(--red)" }[shareClass(share)];
+}
+function criterionById(id) {
+  return CRITERIA.find((c) => c.id === id);
+}
+function findDialog(id) {
+  return data.dialogs.find((d) => String(d.conversation_id) === String(id));
+}
+function isOk(dialog) {
+  return dialog.result.status === "ok";
+}
+function showToast(text) {
+  const toast = document.getElementById("toast");
+  toast.textContent = text;
+  toast.classList.remove("hidden");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.add("hidden"), 2600);
+}
+
+// Значения критериев, которые поставил ИИ
+function aiValues(dialog) {
+  const values = {};
+  for (const c of dialog.result.criteria) values[c.criterion_id] = c.value;
+  return values;
+}
+// Финальные значения: оценка ИИ + решения человека по апелляциям
+function finalValues(dialog) {
+  const values = aiValues(dialog);
+  for (const a of appeals) {
+    if (a.set === data.set && String(a.conversation_id) === String(dialog.conversation_id) && a.status === "done") {
+      values[a.criterion_id] = a.final_value;
+    }
+  }
+  return values;
+}
+function dialogAppeals(dialog) {
+  return appeals.filter((a) => a.set === data.set && String(a.conversation_id) === String(dialog.conversation_id));
+}
+function reviewStatus(dialog) {
+  const list = dialogAppeals(dialog);
+  if (list.some((a) => a.status === "new")) return { text: "Апелляция", cls: "mid" };
+  if (list.length > 0 || confirmed[data.set + ":" + dialog.conversation_id]) return { text: "Проверен человеком", cls: "good" };
+  return { text: "Не проверен", cls: "na" };
+}
+
+// =====================================================================
+// Загрузка данных и переключение разделов
+// =====================================================================
+async function start() {
+  for (const set of SETS) {
+    try {
+      const response = await fetch("data/dialogs_" + set + ".json", { cache: "no-store" });
+      if (response.ok) available[set] = await response.json();
+    } catch (e) { /* такого набора нет */ }
+  }
+  const select = document.getElementById("set-select");
+  const names = Object.keys(available);
+  if (names.length === 0) {
+    document.getElementById("app").innerHTML =
+      '<div class="card error-box"><h2>Нет данных</h2>Сначала запустите <b>python evaluate.py --set demo</b> ' +
+      "(или dev), затем откройте сайт через <b>python -m http.server</b>.</div>";
+    return;
+  }
+  select.innerHTML = names.map((n) =>
+    `<option value="${n}">${n.toUpperCase()} · ${available[n].dialogs.length} диалогов</option>`).join("");
+  const saved = loadStored("cqa_set", names[0]);
+  select.value = names.includes(saved) ? saved : names[0];
+  select.addEventListener("change", () => {
+    saveStored("cqa_set", select.value);
+    useSet(select.value);
+    location.hash = "#dialogs";
+    render();
+  });
+  useSet(select.value);
+  setupModal();
+  window.addEventListener("hashchange", render);
+  render();
+}
+
+function useSet(name) {
+  data = available[name];
+  CRITERIA = data.checklist;
+  document.getElementById("model-name").textContent = "Модель: " + data.model.name;
+  checkFormula();
+}
+
+// Проверяем, что формула сайта даёт тот же балл, что Python
+let formulaCheck = { same: 0, total: 0 };
+function checkFormula() {
+  formulaCheck = { same: 0, total: 0 };
+  for (const d of data.dialogs.filter(isOk)) {
+    formulaCheck.total++;
+    if (calcScore(aiValues(d)).final_score === d.result.score.final_score) formulaCheck.same++;
+    else console.warn("Балл не совпал с Python:", d.conversation_id);
+  }
+}
+
+function render() {
+  // останавливаем звук, если уходим со страницы звонка
+  document.querySelectorAll("audio").forEach((a) => a.pause());
+  stopPlayhead();
+
+  const hash = decodeURIComponent(location.hash.slice(1)) || "dialogs";
+  const slash = hash.indexOf("/");
+  const view = slash === -1 ? hash : hash.slice(0, slash);
+  const param = slash === -1 ? null : hash.slice(slash + 1);
+
+  const menuView = { dialog: "dialogs", appeal: "appeals" }[view] || view;
+  document.querySelectorAll(".menu a").forEach((a) =>
+    a.classList.toggle("active", a.dataset.view === menuView));
+  updateAppealBadge();
+
+  if (view === "dialog") renderDialog(param);
+  else if (view === "checklist") renderChecklist();
+  else if (view === "appeals" || view === "appeal") renderAppeals(param);
+  else if (view === "analytics") renderAnalytics();
+  else renderDialogs();
+  window.scrollTo(0, 0);
+}
+
+function updateAppealBadge() {
+  const open = appeals.filter((a) => a.status === "new").length;
+  document.getElementById("appeals-count").textContent = open || "";
+}
+
+// =====================================================================
+// 1. Список диалогов
+// =====================================================================
+function renderDialogs() {
+  const app = document.getElementById("app");
+  const okCount = data.dialogs.filter(isOk).length;
+  app.innerHTML = `
+    <div class="page-head">
+      <div>
+        <h1>Диалоги</h1>
+        <div class="muted">${data.dialogs.length} диалогов · оценено ${okCount} · ошибок ${data.dialogs.length - okCount}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="filters">
+        <label><input type="checkbox" id="f-critical" ${filters.onlyCritical ? "checked" : ""}> Только нарушения</label>
+        <label><input type="checkbox" id="f-errors" ${filters.onlyErrors ? "checked" : ""}> Только ошибки</label>
+        <select id="f-language">
+          <option value="all">Все языки</option>
+          ${Object.entries(LANGUAGES).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}
+        </select>
+        <select id="f-channel">
+          <option value="all">Все каналы</option>
+          <option value="chat">Чаты</option>
+          <option value="call">Звонки</option>
+        </select>
+        <input id="f-search" placeholder="Поиск по ID" value="${esc(filters.search)}">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>ID</th><th>Канал</th><th>Язык</th><th>Итоговый балл</th>
+            <th>Нарушение</th><th>Статус</th><th>Проверка</th>
+          </tr></thead>
+          <tbody id="dialog-rows"></tbody>
+        </table>
+      </div>
+    </div>`;
+
+  document.getElementById("f-language").value = filters.language;
+  document.getElementById("f-channel").value = filters.channel;
+  const update = () => {
+    filters.onlyCritical = document.getElementById("f-critical").checked;
+    filters.onlyErrors = document.getElementById("f-errors").checked;
+    filters.language = document.getElementById("f-language").value;
+    filters.channel = document.getElementById("f-channel").value;
+    filters.search = document.getElementById("f-search").value.trim().toLowerCase();
+    fillDialogRows();
+  };
+  app.querySelectorAll(".filters input, .filters select").forEach((el) => el.addEventListener("input", update));
+  fillDialogRows();
+}
+
+function fillDialogRows() {
+  let list = data.dialogs.filter((d) => {
+    const critical = isOk(d) && finalValues(d).critical === true;
+    if (filters.onlyCritical && !critical) return false;
+    if (filters.onlyErrors && isOk(d)) return false;
+    if (filters.language !== "all" && d.language !== filters.language) return false;
+    if (filters.channel !== "all" && d.channel !== filters.channel) return false;
+    if (filters.search && !String(d.conversation_id).toLowerCase().includes(filters.search)) return false;
+    return true;
+  });
+
+  // сортировка: сначала нарушения, потом ошибки, потом по возрастанию балла
+  const rank = (d) => {
+    if (!isOk(d)) return [1, 0];
+    const values = finalValues(d);
+    return [values.critical ? 0 : 2, calcScore(values).final_score];
+  };
+  list.sort((a, b) => {
+    const ra = rank(a), rb = rank(b);
+    return ra[0] - rb[0] || ra[1] - rb[1];
+  });
+
+  const rows = list.map((d) => {
+    let scoreCell = '<span class="badge na score-badge">—</span>';
+    let flagCell = "—";
+    let statusCell = '<span class="badge bad">Ошибка</span>';
+    if (isOk(d)) {
+      const values = finalValues(d);
+      const score = calcScore(values).final_score;
+      const changed = score !== d.result.score.final_score ? ' <span class="changed">изм.</span>' : "";
+      scoreCell = `<span class="badge score-badge ${scoreClass(score)}">${fmtNum(score)}</span>${changed}`;
+      flagCell = values.critical ? '<span class="flag">⚠ Да</span>' : '<span class="muted">Нет</span>';
+      statusCell = '<span class="badge good">Оценён</span>';
+    }
+    const review = reviewStatus(d);
+    return `<tr class="clickable" data-id="${esc(d.conversation_id)}">
+      <td class="id-cell">${esc(d.conversation_id)}</td>
+      <td>${d.channel === "call" ? "📞 Звонок" : "💬 Чат"}</td>
+      <td>${LANGUAGES[d.language] || esc(d.language)}</td>
+      <td>${scoreCell}</td>
+      <td>${flagCell}</td>
+      <td>${statusCell}</td>
+      <td><span class="badge ${review.cls}">${review.text}</span></td>
+    </tr>`;
+  });
+  const body = document.getElementById("dialog-rows");
+  body.innerHTML = rows.join("") || '<tr><td colspan="7" class="empty">Ничего не найдено</td></tr>';
+  body.querySelectorAll("tr[data-id]").forEach((tr) =>
+    tr.addEventListener("click", () => { location.hash = "#dialog/" + encodeURIComponent(tr.dataset.id); }));
+}
+
+// =====================================================================
+// 2. Анализ разговора
+// =====================================================================
+function renderDialog(id) {
+  const app = document.getElementById("app");
+  const d = findDialog(id);
+  if (!d) {
+    app.innerHTML = '<div class="card empty">Диалог не найден. <a href="#dialogs">К списку</a></div>';
+    return;
+  }
+
+  const isCall = d.channel === "call";
+  app.innerHTML = `
+    <button class="btn back" onclick="location.hash='#dialogs'">← К списку диалогов</button>
+    <div class="page-head">
+      <div class="dialog-title">
+        <h1>${esc(d.conversation_id)}</h1>
+        <span class="chip">${isCall ? "📞 Звонок" : "💬 Чат"}</span>
+        <span class="chip">${LANGUAGES[d.language] || esc(d.language)}</span>
+        <span class="chip">${d.turns.length} реплик</span>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="stack">
+        ${isCall ? playerHtml(d) : ""}
+        <div class="card">
+          <h2>Расшифровка</h2>
+          <div class="transcript ${isCall ? "" : "chat"}" id="transcript">
+            ${d.turns.map(turnHtml).join("")}
+          </div>
+        </div>
+      </div>
+      <div class="stack">${isOk(d) ? scoreCardsHtml(d) : errorCardHtml(d)}</div>
+    </div>`;
+
+  if (isCall) setupPlayer(d);
+  if (isOk(d)) {
+    animateRing();
+    app.querySelectorAll("[data-turn]").forEach((btn) =>
+      btn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        goToTurn(d, Number(btn.dataset.turn));
+      }));
+    app.querySelectorAll(".crit-row[data-crit]").forEach((row) =>
+      row.addEventListener("click", () => {
+        document.getElementById("detail-" + row.dataset.crit).classList.toggle("hidden");
+      }));
+    document.getElementById("btn-appeal").addEventListener("click", () => openAppealModal(d));
+    document.getElementById("btn-confirm").addEventListener("click", () => {
+      confirmed[data.set + ":" + d.conversation_id] = true;
+      saveStored("cqa_confirmed", confirmed);
+      showToast("Оценка подтверждена проверяющим");
+    });
+  }
+}
+
+function turnHtml(turn) {
+  return `<div class="turn ${turn.role}" id="turn-${turn.n}">
+    <div class="turn-n">${turn.n}</div>
+    <div>
+      <div class="turn-meta"><span class="turn-role">${ROLES[turn.role]}</span><span>${esc(turnTime(turn))}</span></div>
+      <div class="turn-text">${esc(turn.text)}</div>
+    </div>
+  </div>`;
+}
+
+function errorCardHtml(d) {
+  return `<div class="card">
+    <h2>Оценка качества</h2>
+    <div class="error-box">
+      <b>Этот диалог не удалось оценить автоматически.</b>
+      <p>Причина: ${esc(d.result.error)}</p>
+      <p>Балл не выставлен (это не ноль). Диалог нужно проверить вручную или запустить оценку ещё раз.</p>
+    </div>
+  </div>`;
+}
+
+function scoreCardsHtml(d) {
+  const ai = aiValues(d);
+  const values = finalValues(d);
+  const score = calcScore(values).final_score;
+  const aiScore = d.result.score.final_score;
+  const rationale = {};
+  for (const c of d.result.criteria) rationale[c.criterion_id] = c;
+
+  // строки критериев: "набрано / вес"
+  const rows = CRITERIA.map((c) => {
+    const value = values[c.id];
+    let points, bar = "";
+    if (c.id === "critical") {
+      points = value ? '<span class="badge bad">Нарушение</span>' : '<span class="badge good">Нет</span>';
+    } else if (value === null) {
+      points = '<span class="badge na">N/A</span>';
+    } else {
+      const share = criterionShare(c.id, value);
+      points = `<span style="color:${shareColor(share)}">${fmtNum(c.weight * share)}</span><span class="muted"> / ${c.weight}</span>`;
+      bar = `<div class="crit-bar"><div style="width:0;background:${shareColor(share)}" data-width="${share * 100}"></div></div>`;
+    }
+    const changed = value !== ai[c.id]
+      ? `<div class="changed">ИИ: ${valueLabel(ai[c.id])} → человек: ${valueLabel(value)}</div>` : "";
+    const r = rationale[c.id];
+    return `<div class="crit-row" data-crit="${c.id}" style="cursor:pointer">
+        <div><div class="crit-name">${esc(c.name)}</div>${changed}${bar}</div>
+        <div class="crit-points">${points}</div>
+      </div>
+      <div class="hidden reason" id="detail-${c.id}" style="border-color:var(--gray)">
+        <p>${esc(r.rationale)}</p>${evidenceButtons(r.evidence_turns)}
+      </div>`;
+  }).join("");
+
+  // "почему снижена оценка": критерии, где потеряны баллы
+  const reasons = CRITERIA.filter((c) => {
+    const v = values[c.id];
+    if (c.id === "critical") return v === true;
+    return v !== null && criterionShare(c.id, v) < 1;
+  }).map((c) => {
+    const v = values[c.id];
+    const lost = c.id === "critical" ? "грубое нарушение" : "−" + fmtNum(c.weight * (1 - criterionShare(c.id, v))) + " из " + c.weight;
+    const bad = c.id === "critical" || criterionShare(c.id, v) < 0.5;
+    return `<div class="reason ${bad ? "bad" : ""}">
+      <div class="reason-title"><span>${esc(c.name)}</span><span>${lost}</span></div>
+      <p>${esc(rationale[c.id].rationale)}</p>
+      ${evidenceButtons(rationale[c.id].evidence_turns)}
+    </div>`;
+  }).join("");
+
+  const color = shareColor(score / 100 >= 0.8 ? 1 : score / 100 >= 0.6 ? 0.6 : 0);
+  const circle = 2 * Math.PI * 56;
+  return `
+    <div class="card">
+      <h2>Оценка качества</h2>
+      ${values.critical ? '<div class="critical-alert">⚠ Выявлено грубое нарушение. Балл не обнулён, но диалог требует внимания руководителя.</div>' : ""}
+      <div class="score-head">
+        <div class="ring">
+          <svg width="136" height="136">
+            <circle class="ring-bg" cx="68" cy="68" r="56"></circle>
+            <circle class="ring-fg" id="ring" cx="68" cy="68" r="56" stroke="${color}"
+              stroke-dasharray="${circle}" stroke-dashoffset="${circle}" data-target="${circle * (1 - score / 100)}"></circle>
+          </svg>
+          <div class="ring-value"><div><b>${fmtNum(score)}</b><span>из 100</span></div></div>
+        </div>
+        <div>
+          <div class="muted">Итоговый балл</div>
+          ${score !== aiScore
+            ? `<div>Оценка ИИ: <b>${fmtNum(aiScore)}</b> → финальная оценка человека: <b>${fmtNum(score)}</b></div>`
+            : '<div class="muted">Нажмите на критерий, чтобы увидеть объяснение</div>'}
+        </div>
+      </div>
+      <div class="criteria-list">${rows}</div>
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-appeal">Оспорить оценку</button>
+        <button class="btn" id="btn-confirm">Подтвердить оценку</button>
+      </div>
+      <div class="ai-note">Оценку предложил ИИ. Решение принимает человек.</div>
+    </div>
+    <div class="card">
+      <h2>Почему снижена оценка</h2>
+      ${reasons || '<div class="muted">Баллы не снижены: все применимые критерии выполнены.</div>'}
+    </div>`;
+}
+
+function evidenceButtons(turns) {
+  return turns.map((n) =>
+    `<button class="btn btn-small btn-link" data-turn="${n}">→ Перейти к фрагменту №${n}</button>`).join(" ");
+}
+
+function animateRing() {
+  // небольшая задержка, чтобы браузер успел нарисовать круг и запустил анимацию
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const ring = document.getElementById("ring");
+    if (ring) ring.style.strokeDashoffset = ring.dataset.target;
+    document.querySelectorAll("[data-width]").forEach((el) => { el.style.width = el.dataset.width + "%"; });
+  }));
+}
+
+// Прокрутить расшифровку к реплике, подсветить её и (для звонка) перемотать аудио
+function goToTurn(d, n) {
+  const el = document.getElementById("turn-" + n);
+  if (!el) return;
+  const box = document.getElementById("transcript");
+  box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2, behavior: "smooth" });
+  box.closest(".card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  document.querySelectorAll(".turn.highlight").forEach((t) => t.classList.remove("highlight"));
+  el.classList.add("highlight");
+  setTimeout(() => el.classList.remove("highlight"), 3500);
+
+  const turn = d.turns.find((t) => t.n === n);
+  if (d.channel === "call" && turn && turn.start !== null) {
+    player.selection = [turn.start, turn.end ?? turn.start + 2];
+    const audio = document.getElementById("audio");
+    if (audio && audio.src) {
+      audio.currentTime = turn.start;
+      audio.play().catch(() => {});
+    }
+    drawTracks();
+  }
+}
+
+// =====================================================================
+// Аудиоплеер с дорожками "Клиент" / "Оператор" на canvas
+// =====================================================================
+let player = { dialog: null, duration: 0, selection: null, frame: null };
+
+function playerHtml(d) {
+  return `<div class="card player">
+    <h2>Запись звонка</h2>
+    ${d.audio ? `<audio id="audio" controls></audio>`
+              : '<div class="no-audio">Аудиофайл недоступен — дорожки построены по тайм-кодам расшифровки.</div>'}
+    <div class="tracks">
+      <div style="display:flex;gap:18px;margin-bottom:6px">
+        <span class="track-label"><span class="dot" style="background:var(--client)"></span>Клиент</span>
+        <span class="track-label"><span class="dot" style="background:var(--operator)"></span>Оператор</span>
+        <span class="muted" style="margin-left:auto;font-size:13px" id="time-now">00:00</span>
+      </div>
+      <canvas id="tracks"></canvas>
+    </div>
+  </div>`;
+}
+
+function setupPlayer(d) {
+  const lastEnd = Math.max(1, ...d.turns.map((t) => t.end ?? t.start ?? 0));
+  player = { dialog: d, duration: lastEnd, selection: null, frame: null };
+  const canvas = document.getElementById("tracks");
+  const audio = document.getElementById("audio");
+
+  if (audio) {
+    // Скачиваем файл целиком и даём плееру ссылку на него в памяти.
+    // Так перемотка работает даже на простом python -m http.server.
+    fetch(d.audio)
+      .then((response) => response.blob())
+      .then((blob) => { audio.src = URL.createObjectURL(blob); })
+      .catch(() => showToast("Не удалось загрузить аудио"));
+    audio.addEventListener("loadedmetadata", () => {
+      if (isFinite(audio.duration)) player.duration = Math.max(audio.duration, lastEnd);
+      drawTracks();
+    });
+    audio.addEventListener("play", startPlayhead);
+    audio.addEventListener("pause", () => { stopPlayhead(); drawTracks(); });
+    audio.addEventListener("seeked", drawTracks);
+  }
+
+  // клик по дорожке — перемотка
+  canvas.addEventListener("click", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const time = (event.clientX - rect.left) / rect.width * player.duration;
+    const turn = d.turns.find((t) => t.start !== null && t.start <= time && time <= (t.end ?? t.start));
+    player.selection = turn ? [turn.start, turn.end] : null;
+    if (audio) audio.currentTime = time;
+    if (turn) goToTurn(d, turn.n);
+    drawTracks();
+  });
+  window.onresize = drawTracks;
+  drawTracks();
+}
+
+function startPlayhead() {
+  stopPlayhead();
+  const loop = () => { drawTracks(); player.frame = requestAnimationFrame(loop); };
+  loop();
+}
+function stopPlayhead() {
+  if (player.frame) cancelAnimationFrame(player.frame);
+  player.frame = null;
+}
+
+function drawTracks() {
+  const canvas = document.getElementById("tracks");
+  if (!canvas) return;
+  const audio = document.getElementById("audio");
+  const ratio = window.devicePixelRatio || 1;
+  const width = canvas.clientWidth;
+  const height = 150;
+  canvas.width = width * ratio;
+  canvas.height = height * ratio;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(ratio, ratio);
+  ctx.clearRect(0, 0, width, height);
+
+  const duration = player.duration;
+  const x = (time) => time / duration * width;
+  const lanes = { client: { y: 40, color: "#3D7DD8" }, operator: { y: 110, color: "#5FA02B" } };
+
+  // выбранный фрагмент
+  if (player.selection) {
+    ctx.fillStyle = "rgba(232, 163, 23, 0.18)";
+    ctx.fillRect(x(player.selection[0]), 0, Math.max(3, x(player.selection[1]) - x(player.selection[0])), height);
+  }
+
+  // линии дорожек
+  ctx.strokeStyle = "#E4E8EC";
+  for (const lane of Object.values(lanes)) {
+    ctx.beginPath(); ctx.moveTo(0, lane.y); ctx.lineTo(width, lane.y); ctx.stroke();
+  }
+
+  // столбики: там, где человек говорит (по тайм-кодам реплик)
+  const step = 0.2;                                     // один столбик = 0.2 секунды
+  const barWidth = Math.max(1.5, x(step) - 1);
+  const now = audio ? audio.currentTime : 0;
+  for (const turn of player.dialog.turns) {
+    const lane = lanes[turn.role];
+    if (!lane || turn.start === null) continue;
+    const end = turn.end ?? turn.start + 1;
+    for (let t = turn.start, i = 0; t < end; t += step, i++) {
+      // высота "волны" — просто красивая псевдослучайная, звук не разбираем
+      const wave = 0.3 + 0.7 * Math.abs(Math.sin(i * 1.7 + turn.n * 3.1)) * (0.55 + 0.45 * Math.abs(Math.sin(i * 0.37)));
+      const h = wave * 26;
+      ctx.fillStyle = lane.color;
+      ctx.globalAlpha = t <= now ? 1 : 0.45;           // проигранная часть ярче
+      ctx.fillRect(x(t), lane.y - h, barWidth, h * 2);
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // бегущая линия текущей позиции
+  ctx.fillStyle = "#1E2833";
+  ctx.fillRect(x(now) - 1, 0, 2, height);
+  document.getElementById("time-now").textContent = fmtTime(now) + " / " + fmtTime(duration);
+
+  // подсветка текущей реплики в расшифровке
+  if (audio && !audio.paused) {
+    const current = player.dialog.turns.find((t) => t.start !== null && t.start <= now && now <= (t.end ?? t.start));
+    document.querySelectorAll(".turn.playing").forEach((el) => {
+      if (!current || el.id !== "turn-" + current.n) el.classList.remove("playing");
+    });
+    if (current) {
+      const el = document.getElementById("turn-" + current.n);
+      if (!el.classList.contains("playing")) {
+        el.classList.add("playing");
+        const box = document.getElementById("transcript");
+        box.scrollTo({ top: el.offsetTop - box.clientHeight / 2, behavior: "smooth" });
+      }
+    }
+  }
+}
+
+// =====================================================================
+// Окно "Оспорить оценку"
+// =====================================================================
+let modalDialog = null;
+
+function setupModal() {
+  const criterionSelect = document.getElementById("appeal-criterion");
+  criterionSelect.addEventListener("change", fillAppealValues);
+  document.getElementById("appeal-cancel").addEventListener("click", closeModal);
+  document.getElementById("modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
+  document.getElementById("appeal-save").addEventListener("click", () => {
+    const criterionId = criterionSelect.value;
+    const appeal = {
+      id: Date.now(),
+      set: data.set,
+      conversation_id: modalDialog.conversation_id,
+      criterion_id: criterionId,
+      ai_value: aiValues(modalDialog)[criterionId],
+      proposed_value: JSON.parse(document.getElementById("appeal-value").value),
+      comment: document.getElementById("appeal-comment").value.trim(),
+      created_at: new Date().toISOString(),
+      status: "new",
+    };
+    appeals.push(appeal);
+    saveStored("cqa_appeals", appeals);
+    closeModal();
+    showToast("Апелляция отправлена");
+    location.hash = "#appeal/" + appeal.id;
+  });
+}
+
+function openAppealModal(d) {
+  modalDialog = d;
+  document.getElementById("modal-dialog-id").textContent = "Диалог " + d.conversation_id;
+  document.getElementById("appeal-criterion").innerHTML =
+    CRITERIA.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  document.getElementById("appeal-comment").value = "";
+  fillAppealValues();
+  document.getElementById("modal").classList.remove("hidden");
+}
+
+function fillAppealValues() {
+  const criterionId = document.getElementById("appeal-criterion").value;
+  const aiValue = aiValues(modalDialog)[criterionId];
+  document.getElementById("appeal-ai-value").textContent = valueLabel(aiValue);
+  const select = document.getElementById("appeal-value");
+  select.innerHTML = criterionById(criterionId).values.map((v) =>
+    `<option value='${JSON.stringify(v)}'>${valueLabel(v)}</option>`).join("");
+  // по умолчанию предлагаем значение, отличное от оценки ИИ
+  const other = criterionById(criterionId).values.find((v) => v !== aiValue);
+  select.value = JSON.stringify(other === undefined ? aiValue : other);
+}
+
+function closeModal() {
+  document.getElementById("modal").classList.add("hidden");
+}
+
+// =====================================================================
+// 3. Апелляции
+// =====================================================================
+function renderAppeals(selectedId) {
+  const app = document.getElementById("app");
+  const list = appeals.filter((a) => a.set === data.set)
+    .filter((a) => appealTab === "all" || a.status === appealTab)
+    .sort((a, b) => (a.status === "new" ? 0 : 1) - (b.status === "new" ? 0 : 1) || b.id - a.id);
+  const selected = appeals.find((a) => String(a.id) === String(selectedId)) || list[0];
+
+  app.innerHTML = `
+    <div class="page-head">
+      <div><h1>Апелляции</h1><div class="muted">Человек проверяет спорные оценки ИИ и принимает финальное решение</div></div>
+      <button class="btn" id="download">⬇ Скачать appeals.json</button>
+    </div>
+    <div class="appeal-layout">
+      <div class="card">
+        <div class="filters">
+          <select id="appeal-tab">
+            <option value="all">Все</option><option value="new">Новые</option><option value="done">Решённые</option>
+          </select>
+        </div>
+        ${list.length ? list.map((a) => appealItemHtml(a, selected)).join("")
+          : '<div class="empty">Апелляций пока нет.<br>Откройте диалог и нажмите «Оспорить оценку».</div>'}
+      </div>
+      <div class="card">${selected && selected.set === data.set ? appealDetailHtml(selected) : '<div class="empty">Выберите апелляцию слева</div>'}</div>
+    </div>`;
+
+  document.getElementById("appeal-tab").value = appealTab;
+  document.getElementById("appeal-tab").addEventListener("change", (e) => { appealTab = e.target.value; renderAppeals(); });
+  document.getElementById("download").addEventListener("click", downloadAppeals);
+  app.querySelectorAll(".appeal-item").forEach((el) =>
+    el.addEventListener("click", () => { location.hash = "#appeal/" + el.dataset.id; }));
+  if (selected && selected.set === data.set) setupAppealDetail(selected);
+}
+
+function appealItemHtml(a, selected) {
+  const c = criterionById(a.criterion_id);
+  const isSelected = selected && selected.id === a.id;
+  return `<div class="appeal-item ${isSelected ? "selected" : ""}" data-id="${a.id}">
+    <div class="appeal-top">
+      <span>${esc(a.conversation_id)}</span>
+      <span class="badge ${a.status === "new" ? "status-new" : "status-done"}">${a.status === "new" ? "Новая" : "Решена"}</span>
+    </div>
+    <div class="muted">${esc(c.name)}: ${valueLabel(a.ai_value)} → ${valueLabel(a.proposed_value)}</div>
+  </div>`;
+}
+
+function appealDetailHtml(a) {
+  const d = findDialog(a.conversation_id);
+  if (!d || !isOk(d)) return '<div class="empty">Диалог этой апелляции не найден в текущем наборе.</div>';
+  const c = criterionById(a.criterion_id);
+  const aiItem = d.result.criteria.find((x) => x.criterion_id === a.criterion_id);
+  const aiScore = d.result.score.final_score;
+  const finalScore = calcScore(finalValues(d)).final_score;
+  const quotes = aiItem.evidence_turns.map((n) => {
+    const t = d.turns.find((x) => x.n === n);
+    return t ? `<div class="quote"><b>№${n} ${ROLES[t.role]}:</b> ${esc(t.text)}</div>` : "";
+  }).join("");
+
+  const decision = a.status === "done"
+    ? `<div class="reason" style="border-color:var(--green);background:var(--green-light)">
+         <b>Решение зафиксировано:</b> ${esc(c.name)} = ${valueLabel(a.final_value)}
+         ${a.reviewer_comment ? `<p>${esc(a.reviewer_comment)}</p>` : ""}
+         <div class="muted">${new Date(a.resolved_at).toLocaleString("ru-RU")}</div>
+       </div>
+       <button class="btn" id="reopen">Пересмотреть решение</button>`
+    : `<div class="form-row"><label><b>Финальное значение критерия</b></label>
+         <select id="final-value">${c.values.map((v) =>
+           `<option value='${JSON.stringify(v)}'>${valueLabel(v)}</option>`).join("")}</select></div>
+       <div class="form-row"><label><b>Комментарий проверяющего</b></label>
+         <textarea id="reviewer-comment" rows="3" placeholder="Почему принято такое решение"></textarea></div>
+       <div class="muted" id="preview"></div>
+       <div class="actions">
+         <button class="btn" id="keep-ai">Подтвердить оценку ИИ</button>
+         <button class="btn btn-primary" id="fix-final">Зафиксировать финальную оценку</button>
+       </div>`;
+
+  return `
+    <div class="dialog-title"><h2 style="margin:0">${esc(c.name)}</h2>
+      <a class="btn btn-small" href="#dialog/${encodeURIComponent(d.conversation_id)}">Открыть диалог ${esc(d.conversation_id)}</a></div>
+    <div class="compare">
+      <span>Оценка ИИ: ${fmtNum(aiScore)}</span><span class="arrow">→</span>
+      <span style="color:var(--green-dark)">Финальная: <span id="final-score">${fmtNum(finalScore)}</span></span>
+    </div>
+    <h3>Что решил ИИ: ${valueLabel(a.ai_value)}</h3>
+    <p>${esc(aiItem.rationale)}</p>
+    ${quotes}
+    <h3 style="margin-top:18px">Апелляция: предлагают «${valueLabel(a.proposed_value)}»</h3>
+    <p>${a.comment ? esc(a.comment) : '<span class="muted">Без комментария</span>'}</p>
+    <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
+    ${decision}`;
+}
+
+function setupAppealDetail(a) {
+  const d = findDialog(a.conversation_id);
+  if (!d || !isOk(d)) return;
+  const reopen = document.getElementById("reopen");
+  if (reopen) {
+    reopen.addEventListener("click", () => {
+      a.status = "new";
+      saveStored("cqa_appeals", appeals);
+      renderAppeals(a.id);
+      updateAppealBadge();
+    });
+    return;
+  }
+  const select = document.getElementById("final-value");
+  select.value = JSON.stringify(a.proposed_value);
+
+  // показываем, каким станет балл, ещё до сохранения
+  const preview = () => {
+    const values = finalValues(d);
+    values[a.criterion_id] = JSON.parse(select.value);
+    document.getElementById("preview").textContent =
+      "Если зафиксировать это значение, итоговый балл будет " + fmtNum(calcScore(values).final_score);
+  };
+  select.addEventListener("change", preview);
+  preview();
+
+  const resolve = (value) => {
+    a.status = "done";
+    a.final_value = value;
+    a.reviewer_comment = document.getElementById("reviewer-comment").value.trim();
+    a.resolved_at = new Date().toISOString();
+    saveStored("cqa_appeals", appeals);
+    showToast("Финальная оценка зафиксирована");
+    renderAppeals(a.id);
+    updateAppealBadge();
+  };
+  document.getElementById("keep-ai").addEventListener("click", () => resolve(a.ai_value));
+  document.getElementById("fix-final").addEventListener("click", () => resolve(JSON.parse(select.value)));
+}
+
+function downloadAppeals() {
+  const list = appeals.filter((a) => a.set === data.set).map((a) => {
+    const d = findDialog(a.conversation_id);
+    return Object.assign({}, a, {
+      ai_final_score: d && isOk(d) ? d.result.score.final_score : null,
+      human_final_score: d && isOk(d) ? calcScore(finalValues(d)).final_score : null,
+    });
+  });
+  const blob = new Blob([JSON.stringify(list, null, 2)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "appeals.json";
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+// =====================================================================
+// 4. Аналитика
+// =====================================================================
+const ADVICE = {
+  contact: ["people", "Сотрудники", "Напомнить операторам приветствие и представление; добавить в скрипт начала диалога."],
+  discovery: ["people", "Сотрудники", "Тренинг по уточняющим вопросам: 2–3 обязательных вопроса перед ответом."],
+  identification: ["instr", "Инструкция", "Обновить регламент: когда и как проверять личность клиента перед раскрытием данных."],
+  consultation: ["instr", "Инструкция", "Дополнить базу знаний ответами на частые вопросы (комиссии, вывод денег, маржин-колл)."],
+  empathy: ["people", "Сотрудники", "Тренинг по клиентоориентированности: признавать эмоции клиента."],
+  dialogue: ["service", "Сервис", "Проверить нагрузку и время ответа; дать операторам шаблоны быстрых ответов."],
+  closure: ["people", "Сотрудники", "Скрипт завершения: «Остались ли вопросы?» и прощание."],
+  critical: ["service", "Сервис", "Каждый случай грубого нарушения разбирать с руководителем; добавить автопроверку рискованных фраз."],
+};
+
+function renderAnalytics() {
+  const app = document.getElementById("app");
+  const ok = data.dialogs.filter(isOk);
+  const scored = ok.map((d) => ({ d, values: finalValues(d), score: calcScore(finalValues(d)).final_score }));
+  const avg = scored.length ? scored.reduce((s, x) => s + x.score, 0) / scored.length : 0;
+  const withCritical = scored.filter((x) => x.values.critical);
+  const openAppeals = appeals.filter((a) => a.set === data.set && a.status === "new").length;
+  const allAppeals = appeals.filter((a) => a.set === data.set).length;
+
+  // гистограмма: 10 корзин по 10 баллов
+  const bins = new Array(10).fill(0);
+  for (const x of scored) bins[Math.min(9, Math.floor(x.score / 10))]++;
+  const maxBin = Math.max(1, ...bins);
+  const histogram = bins.map((count, i) => `
+    <div class="col">
+      <div class="bar" style="height:0;background:${i >= 8 ? "var(--green)" : i >= 6 ? "var(--yellow)" : "var(--red)"}"
+           data-height="${count / maxBin * 100}"><span>${count || ""}</span></div>
+      <div class="col-label">${i * 10}–${i === 9 ? 100 : i * 10 + 9}</div>
+    </div>`).join("");
+
+  // где теряются баллы: доля диалогов, где критерий выполнен не полностью
+  const losses = CRITERIA.map((c) => {
+    let applicable = 0, lostCount = 0, lostPoints = 0;
+    const examples = [];
+    for (const x of scored) {
+      const v = x.values[c.id];
+      if (c.id === "critical") {
+        applicable++;
+        if (v) { lostCount++; examples.push(x); }
+        continue;
+      }
+      if (v === null) continue;
+      applicable++;
+      const share = criterionShare(c.id, v);
+      if (share < 1) { lostCount++; lostPoints += c.weight * (1 - share); examples.push(x); }
+    }
+    return { c, applicable, lostCount, rate: applicable ? lostCount / applicable : 0,
+             avgLost: applicable ? lostPoints / applicable : 0, examples };
+  }).sort((a, b) => b.rate - a.rate);
+
+  const lossBars = losses.map((l) => `
+    <div class="hbar-row">
+      <div>${esc(l.c.name)}<div class="muted" style="font-size:12px">${l.c.id === "critical" ? "диалогов с нарушением" : "−" + fmtNum(l.avgLost) + " в среднем из " + l.c.weight}</div></div>
+      <div class="hbar"><div style="width:0" data-width="${l.rate * 100}"></div></div>
+      <div class="hbar-value">${Math.round(l.rate * 100)}%</div>
+    </div>`).join("");
+
+  // кого проверить в первую очередь: нарушения и самые низкие баллы
+  const priority = scored.slice().sort((a, b) =>
+    (b.values.critical ? 1 : 0) - (a.values.critical ? 1 : 0) || a.score - b.score).slice(0, 6);
+  const errors = data.dialogs.filter((d) => !isOk(d));
+  const priorityRows = priority.map((x) => `
+    <tr class="clickable" data-id="${esc(x.d.conversation_id)}">
+      <td class="id-cell">${esc(x.d.conversation_id)}</td>
+      <td><span class="badge score-badge ${scoreClass(x.score)}">${fmtNum(x.score)}</span></td>
+      <td>${x.values.critical ? '<span class="flag">⚠ Нарушение</span>' : "Низкий балл"}</td>
+    </tr>`).join("") + errors.map((d) => `
+    <tr class="clickable" data-id="${esc(d.conversation_id)}">
+      <td class="id-cell">${esc(d.conversation_id)}</td><td><span class="badge bad">Ошибка</span></td><td>Проверить вручную</td>
+    </tr>`).join("");
+
+  // самые частые причины снижения: по топ-3 критериям показываем примеры объяснений ИИ
+  const topLosses = losses.filter((l) => l.lostCount > 0).slice(0, 3);
+  const reasons = topLosses.map((l) => {
+    const samples = l.examples.slice(0, 2).map((x) => {
+      const item = x.d.result.criteria.find((c) => c.criterion_id === l.c.id);
+      return `<div class="quote">«${esc(item.rationale)}» <span class="muted">— ${esc(x.d.conversation_id)}</span></div>`;
+    }).join("");
+    return `<div style="margin-bottom:14px"><b>${esc(l.c.name)}</b> <span class="muted">(${l.lostCount} диалогов)</span>${samples}</div>`;
+  }).join("") || '<div class="muted">Потерь баллов нет.</div>';
+
+  const advice = topLosses.map((l) => {
+    const [tag, tagName, text] = ADVICE[l.c.id];
+    return `<div class="reco"><span class="tag tag-${tag}">${tagName}</span><div><b>${esc(l.c.name)}</b> — ${Math.round(l.rate * 100)}% диалогов. ${text}</div></div>`;
+  }).join("") + `<div class="reco"><span class="tag tag-product">Продукт</span><div>Если клиенты часто спрашивают одно и то же (комиссии, пополнение, вывод), стоит добавить подсказки прямо в приложение — меньше обращений.</div></div>`;
+
+  app.innerHTML = `
+    <div class="page-head"><div><h1>Аналитика</h1>
+      <div class="muted">Набор ${data.set.toUpperCase()} · с учётом решений проверяющих по апелляциям</div></div></div>
+    <div class="kpis">
+      <div class="card kpi"><div class="kpi-value" style="color:${shareColor(avg >= 80 ? 1 : avg >= 60 ? .6 : 0)}">${fmtNum(avg.toFixed(1))}</div><div class="kpi-label">Средний балл</div></div>
+      <div class="card kpi"><div class="kpi-value" style="color:var(--red)">${scored.length ? Math.round(withCritical.length / scored.length * 100) : 0}%</div><div class="kpi-label">Диалогов с грубым нарушением (${withCritical.length})</div></div>
+      <div class="card kpi"><div class="kpi-value">${ok.length}<span class="muted" style="font-size:20px"> / ${data.dialogs.length}</span></div><div class="kpi-label">Оценено (ошибок: ${errors.length})</div></div>
+      <div class="card kpi"><div class="kpi-value">${allAppeals}</div><div class="kpi-label">Апелляций (открыто: ${openAppeals})</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="stack">
+        <div class="card"><h2>Распределение баллов</h2><div class="histogram">${histogram}</div></div>
+        <div class="card"><h2>Где чаще всего теряются баллы</h2>${lossBars}</div>
+        <div class="card"><h2>Самые частые причины снижения</h2>${reasons}</div>
+      </div>
+      <div class="stack">
+        <div class="card"><h2>Проверить в первую очередь</h2>
+          <table><thead><tr><th>Диалог</th><th>Балл</th><th>Причина</th></tr></thead><tbody>${priorityRows}</tbody></table></div>
+        <div class="card"><h2>Что стоит улучшить</h2>${advice}</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:22px"><h2>Что это даёт бизнесу</h2>
+      <div class="benefits">
+        <div class="benefit"><b>Качество сервиса</b>Проверяются 100% диалогов, а не 2–3% выборочно.</div>
+        <div class="benefit"><b>Контроль рисков</b>Грубые нарушения (данные без идентификации, просьба кода из SMS) видны сразу.</div>
+        <div class="benefit"><b>Развитие сотрудников</b>Каждая оценка с объяснением и цитатой — готовый материал для обратной связи.</div>
+        <div class="benefit"><b>Улучшение процессов</b>Видно, что чинить: инструкцию, сервис или продукт.</div>
+      </div>
+    </div>`;
+
+  app.querySelectorAll("tr[data-id]").forEach((tr) =>
+    tr.addEventListener("click", () => { location.hash = "#dialog/" + encodeURIComponent(tr.dataset.id); }));
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    app.querySelectorAll("[data-height]").forEach((el) => { el.style.height = el.dataset.height + "%"; });
+    app.querySelectorAll("[data-width]").forEach((el) => { el.style.width = el.dataset.width + "%"; });
+  }));
+}
+
+// =====================================================================
+// 5. Чек-лист
+// =====================================================================
+function renderChecklist() {
+  const rows = CRITERIA.map((c) => `
+    <tr>
+      <td><b>${esc(c.name)}</b><div class="code">${c.id}</div></td>
+      <td class="wrap">${c.values.map((v) => `<span class="chip" style="margin:2px">${valueLabel(v)}</span>`).join("")}</td>
+      <td style="font-size:20px;font-weight:800;color:var(--green-dark)">${c.weight || "—"}</td>
+      <td class="muted wrap">${esc(c.description)}</td>
+    </tr>`).join("");
+  document.getElementById("app").innerHTML = `
+    <div class="page-head"><div><h1>Чек-лист оценки</h1><div class="muted">8 критериев работы оператора</div></div></div>
+    <div class="card">
+      <div class="table-wrap"><table>
+        <thead><tr><th style="width:230px">Критерий</th><th style="width:220px">Значения</th><th>Вес</th><th>Что проверяем</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+    <div class="card" style="margin-top:22px">
+      <h2>Как считается итоговый балл</h2>
+      <p>Для каждого критерия берём долю выполнения: <b>Да = 1</b>, <b>Нет = 0</b>, консультация = значение / 20, ведение диалога = значение / 10.</p>
+      <div class="formula"><b>Итог = Σ (вес × доля) / Σ весов применимых критериев × 100</b>, округляем до 2 знаков.</div>
+      <p><b>N/A</b> — критерий не подходит к диалогу. Это не ноль: критерий просто не участвует, его вес распределяется между остальными.</p>
+      <p><b>Грубые ошибки</b> не входят в сумму и не обнуляют балл — это отдельный флаг для руководителя.</p>
+      <p><b>Пример:</b> контакт = Да, потребность = N/A, идентификация = N/A, консультация = 15, эмпатия = Да, ведение = 7, завершение = Да →
+         (10 + 15 + 15 + 10,5 + 5) / 65 × 100 = <b>${fmtNum(calcScore({ contact: true, discovery: null, identification: null, consultation: 15, empathy: true, dialogue: 7, closure: true, critical: false }).final_score)}</b></p>
+      <p class="muted">Балл считает код, а не ИИ. Проверка: формула сайта совпала с Python в ${formulaCheck.same} из ${formulaCheck.total} диалогов ${formulaCheck.same === formulaCheck.total ? "✓" : "⚠"}</p>
+    </div>`;
+}
+
+start();
