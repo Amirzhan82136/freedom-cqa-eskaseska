@@ -259,30 +259,44 @@ def format_transcript(dialog):
     return "\n".join(lines)
 
 
-def build_system_prompt():
+def build_system_prompt(criteria=CRITERIA):
     """Инструкция для ИИ: критерии, допустимые значения, правила."""
     lines = [
-        "Ты - эксперт контроля качества (CQA) в брокерской компании Freedom Broker.",
-        "Оцени работу ОПЕРАТОРА в диалоге с клиентом по чек-листу из 8 критериев.",
-        "Оценивай только оператора. Реплики клиента, бота и системные события - это контекст, "
-        "за них оператор баллы не теряет.",
+        "Ты - эксперт контроля качества (CQA) в брокерской компании Freedom Broker (Казахстан).",
+        "Оцени работу ОПЕРАТОРА (живого сотрудника поддержки) в диалоге с клиентом по чек-листу.",
+        "",
+        "Как устроены диалоги:",
+        "- Чаты часто начинаются с AI-бота (AIM) и системных событий («Эскалация на оператора»). "
+        "Бот - не оператор: его ответы, ошибки и приветствия оператору НЕ засчитываются и НЕ ставятся в вину.",
+        "- Звонки начинаются с голосового меню (IVR) и служебных событий. Текст звонков получен "
+        "автоматическим распознаванием речи: в нём бывают искажённые слова, обрывы и повторы. "
+        "Не наказывай оператора за ошибки распознавания, оценивай смысл сказанного.",
+        "- Операторов в диалоге может быть несколько (перевод на другого специалиста) - оценивай их работу вместе.",
+        "- Оператор может подключиться не сразу. Пауза до первого ответа оператора - это скорость ответа.",
         "",
         "Критерии и допустимые значения (null = N/A, критерий не применим к этому диалогу):",
     ]
-    for c in CRITERIA:
+    for c in criteria:
         values = ", ".join(json.dumps(v) for v in c["values"])
-        lines.append("- %s (%s). Значения: %s. %s" % (c["id"], c["name"], values, c["description"]))
+        lines.append("- %s (%s). Значения: %s. %s" % (c["id"], c["name"], values, c.get("description", "")))
     lines += [
         "",
         "Правила:",
-        "1. N/A (null) ставь только там, где он разрешён, и только если критерий действительно "
-        "не подходит к диалогу. N/A - это не ноль и не ошибка.",
-        "2. evidence_turns - номера реплик-доказательств из квадратных скобок [N] в транскрипте. "
-        "Нумерация уже сделана по всему диалогу, не пересчитывай её. Указывай 1-4 самых важных номера.",
-        "3. rationale - 1-2 коротких предложения ПО-РУССКИ, даже если диалог на казахском или английском. "
+        "1. Оценивай только реплики оператора. Реплики клиента, бота и события - это контекст.",
+        "2. Не придумывай факты. Если в диалоге нет информации, чтобы уверенно оценить критерий, "
+        "и N/A для него разрешён - ставь null. Если N/A не разрешён - оценивай по тому, что есть, "
+        "и прямо напиши в rationale, чего не хватает.",
+        "3. N/A (null) - не ноль и не ошибка. Ставь его, только если критерий не подходит к ситуации "
+        "(например, общий вопрос не требует идентификации; клиент сразу ясно описал вопрос).",
+        "4. Грубая ошибка (critical = true) - только при явном серьёзном нарушении, видном в репликах оператора. "
+        "Сомнения и мелкие недочёты - это не грубая ошибка.",
+        "5. evidence_turns - номера реплик-доказательств из квадратных скобок [N]. "
+        "Нумерация уже сделана по всему диалогу, не пересчитывай её. Указывай 1-4 самых важных номера, "
+        "по возможности - реплики оператора.",
+        "6. rationale - 1-2 коротких предложения ПО-РУССКИ, даже если диалог на казахском или английском. "
         "Если балл снижен, напиши конкретно, чего не хватило.",
-        "4. Диалоги бывают на русском, казахском и английском. Язык сам по себе не влияет на оценку.",
-        "5. Будь строгим, но справедливым: одинаковые ситуации оценивай одинаково.",
+        "7. Язык диалога (русский, казахский, английский) сам по себе не влияет на оценку.",
+        "8. Будь последовательным: одинаковые ситуации оценивай одинаково.",
     ]
     return "\n".join(lines)
 
@@ -302,10 +316,10 @@ def value_schema(values):
     return {"anyOf": options}
 
 
-def build_answer_schema():
+def build_answer_schema(criteria=CRITERIA):
     """JSON-схема ответа: модель обязана вернуть ровно такие поля."""
     properties = {}
-    for c in CRITERIA:
+    for c in criteria:
         properties[c["id"]] = {
             "type": "object",
             "properties": {
@@ -319,7 +333,7 @@ def build_answer_schema():
     return {
         "type": "object",
         "properties": properties,
-        "required": CRITERIA_IDS,
+        "required": [c["id"] for c in criteria],
         "additionalProperties": False,
     }
 
@@ -327,7 +341,7 @@ def build_answer_schema():
 client = None
 
 
-def ask_model(dialog):
+def ask_model(dialog, criteria=CRITERIA):
     """Отправить диалог модели и получить ответ-словарь. Возвращает (ответ, имя модели)."""
     global client
     if client is None:
@@ -336,11 +350,11 @@ def ask_model(dialog):
     response = client.beta.messages.create(
         model=MODEL,
         max_tokens=16000,
-        system=build_system_prompt(),
+        system=build_system_prompt(criteria),
         messages=[{"role": "user", "content": "Транскрипт диалога:\n\n" + format_transcript(dialog)}],
         # формат ответа: строго JSON по схеме; effort - насколько глубоко модель думает
         output_config={"effort": "medium",
-                       "format": {"type": "json_schema", "schema": build_answer_schema()}},
+                       "format": {"type": "json_schema", "schema": build_answer_schema(criteria)}},
         # если модель откажется отвечать, API само попробует запасную модель
         betas=["server-side-fallback-2026-07-01"],
         fallbacks="default",
@@ -357,15 +371,16 @@ def ask_model(dialog):
 # 3. Проверка ответа и расчёт балла
 # ---------------------------------------------------------------------------
 
-def check_answer(answer, turns_count):
+def check_answer(answer, turns_count, criteria=CRITERIA):
     """Проверить ответ модели простым кодом. Возвращает список проблем (пустой = всё хорошо)."""
     problems = []
-    for criterion_id in CRITERIA_IDS:
+    for c in criteria:
+        criterion_id = c["id"]
         item = answer.get(criterion_id)
         if not isinstance(item, dict):
             problems.append("нет критерия " + criterion_id)
             continue
-        if not is_allowed_value(criterion_id, item.get("value")):
+        if not is_allowed_value(criterion_id, item.get("value"), criteria):
             problems.append("недопустимое значение %s = %r" % (criterion_id, item.get("value")))
         if not str(item.get("rationale", "")).strip():
             problems.append("пустое объяснение (%s)" % criterion_id)
@@ -379,15 +394,15 @@ def check_answer(answer, turns_count):
     return problems
 
 
-def build_result(dialog_id, answer):
+def build_result(dialog_id, answer, criteria=CRITERIA):
     """Собрать запись для results.json из проверенного ответа модели."""
-    criteria = []
+    items = []
     values = {}
-    for criterion_id in CRITERIA_IDS:
-        item = answer[criterion_id]
-        values[criterion_id] = item["value"]
-        criteria.append({
-            "criterion_id": criterion_id,
+    for c in criteria:
+        item = answer[c["id"]]
+        values[c["id"]] = item["value"]
+        items.append({
+            "criterion_id": c["id"],
             "value": item["value"],
             "rationale": item["rationale"].strip(),
             "evidence_turns": sorted(set(item["evidence_turns"])),
@@ -395,8 +410,8 @@ def build_result(dialog_id, answer):
     return {
         "conversation_id": dialog_id,
         "status": "ok",
-        "criteria": criteria,
-        "score": calc_score(values),   # балл считает код, не ИИ
+        "criteria": items,
+        "score": calc_score(values, criteria),   # балл считает код, не ИИ
     }
 
 
@@ -406,28 +421,30 @@ def error_result(dialog_id, message):
             "criteria": [], "score": None, "error": message}
 
 
-def evaluate_dialog(dialog, cache, cache_path):
-    """Оценить один диалог. Возвращает (запись для results.json, имя модели или None)."""
+def evaluate_dialog(dialog, cache=None, cache_path=None, criteria=CRITERIA):
+    """Оценить один диалог. Возвращает (запись для results.json, имя модели или None).
+    cache - уже полученные ответы модели (для живой оценки на сайте кэш не используется)."""
     dialog_id = dialog["conversation_id"]
     turns_count = len(dialog["turns"])
     if turns_count == 0:
         return error_result(dialog_id, "Пустой транскрипт: нечего оценивать."), None
 
     # уже оценивали раньше? берём из кэша, модель не спрашиваем
-    cached = cache.get(str(dialog_id))
-    if cached and not check_answer(cached["answer"], turns_count):
-        return build_result(dialog_id, cached["answer"]), cached["model"]
+    cached = cache.get(str(dialog_id)) if cache is not None else None
+    if cached and not check_answer(cached["answer"], turns_count, criteria):
+        return build_result(dialog_id, cached["answer"], criteria), cached["model"]
 
     last_error = "Не удалось получить ответ модели."
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
-            answer, model_name = ask_model(dialog)
-            problems = check_answer(answer, turns_count)
+            answer, model_name = ask_model(dialog, criteria)
+            problems = check_answer(answer, turns_count, criteria)
             if not problems:
-                with lock:
-                    cache[str(dialog_id)] = {"answer": answer, "model": model_name}
-                    save_json(cache_path, cache)    # прогресс сохраняется сразу
-                return build_result(dialog_id, answer), model_name
+                if cache is not None:
+                    with lock:
+                        cache[str(dialog_id)] = {"answer": answer, "model": model_name}
+                        save_json(cache_path, cache)    # прогресс сохраняется сразу
+                return build_result(dialog_id, answer, criteria), model_name
             last_error = "Ответ модели не прошёл проверку: " + "; ".join(problems)
         except Exception as error:
             last_error = "Ошибка запроса к модели: %s" % error
@@ -523,46 +540,43 @@ def check_input(set_name):
     print("\nПроблем найдено:", problems)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Оценка диалогов операторов")
-    parser.add_argument("--set", required=True, choices=["dev", "prod", "demo", "demo-prod"])
-    parser.add_argument("--limit", type=int, default=0, help="оценить только первые N диалогов (для пробы)")
-    parser.add_argument("--workers", type=int, default=4, help="сколько диалогов оценивать одновременно")
-    parser.add_argument("--check", action="store_true",
-                        help="только прочитать диалоги и показать, как они поняты (без ИИ и без ключа)")
-    args = parser.parse_args()
-
-    if args.check:
-        check_input(args.set)
-        return
-
-    if not args.set.startswith("demo") and not os.getenv("ANTHROPIC_API_KEY"):
+def run_set(set_name, limit=0, workers=4, on_progress=None):
+    """Оценить весь набор: загрузка -> ИИ -> проверка -> балл -> results.json и данные для сайта.
+    on_progress(готово, всего, ошибок) вызывается после каждого диалога (для полосы прогресса на сайте).
+    Возвращает словарь с итогами."""
+    if not set_name.startswith("demo") and not os.getenv("ANTHROPIC_API_KEY"):
         raise SystemExit("Нет ключа модели: впишите ANTHROPIC_API_KEY в файл .env (см. .env.example)")
 
     started = time.time()
-    dialogs = load_dialogs(args.set)
+    dialogs = load_dialogs(set_name)
     if not dialogs:
-        raise SystemExit("Не найдено ни одного диалога. Проверьте папку data/%s/ или CQA_API_URL в .env" % args.set)
-    if args.limit:
-        dialogs = dialogs[:args.limit]
+        raise SystemExit("Не найдено ни одного диалога. Проверьте папку data/%s/ или CQA_API_URL в .env" % set_name)
+    if limit:
+        dialogs = dialogs[:limit]
     print("Диалогов к оценке:", len(dialogs))
 
-    cache_path = os.path.join("cache", args.set + ".json")
+    cache_path = os.path.join("cache", set_name + ".json")
     cache = load_json(cache_path, {})
+    progress = {"done": 0, "errors": 0}
 
     def process(dialog):
+        # официальные наборы всегда оцениваются по чек-листу из гайда (CRITERIA)
         result, model_name = evaluate_dialog(dialog, cache, cache_path)
         with lock:
+            progress["done"] += 1
             if result["status"] == "ok":
                 print("  %-20s балл %6.2f  нарушение: %s" % (
                     dialog["conversation_id"], result["score"]["final_score"],
                     "ДА" if result["score"]["critical_flag"] else "нет"))
             else:
+                progress["errors"] += 1
                 print("  %-20s ОШИБКА: %s" % (dialog["conversation_id"], result["error"]))
+            if on_progress:
+                on_progress(progress["done"], len(dialogs), progress["errors"])
         return result, model_name
 
     # оцениваем несколько диалогов одновременно; если один упал, остальные продолжают
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+    with ThreadPoolExecutor(max_workers=workers) as pool:
         outputs = list(pool.map(process, dialogs))
     results = [result for result, _ in outputs]
     models_used = sorted(set(name for _, name in outputs if name))
@@ -574,10 +588,10 @@ def main():
         "model": {"mode": "external_api", "name": ", ".join(models_used) or MODEL},
         "results": results,
     }
-    if args.set.startswith("demo"):
-        results_path = os.path.join("data", args.set, "results.json")   # демо не смешиваем с настоящими
+    if set_name.startswith("demo"):
+        results_path = os.path.join("data", set_name, "results.json")   # демо не смешиваем с настоящими
     else:
-        results_path = os.path.join("results", args.set, "results.json")
+        results_path = os.path.join("results", set_name, "results.json")
     save_json(results_path, report)
 
     # данные для сайта: диалоги + оценки
@@ -591,23 +605,45 @@ def main():
             "turns": dialog["turns"],
             "result": result,
         })
-    save_json(os.path.join("web", "data", "dialogs_%s.json" % args.set),
-              {"set": args.set, "model": report["model"], "checklist": CRITERIA, "dialogs": web_dialogs})
+    save_json(os.path.join("web", "data", "dialogs_%s.json" % set_name),
+              {"set": set_name, "model": report["model"], "checklist": CRITERIA, "dialogs": web_dialogs})
 
     # итоги прогона
     ok = [r for r in results if r["status"] == "ok"]
-    errors = len(results) - len(ok)
-    average = sum(r["score"]["final_score"] for r in ok) / len(ok) if ok else 0
-    violations = sum(1 for r in ok if r["score"]["critical_flag"])
+    summary = {
+        "records": len(results),
+        "ok": len(ok),
+        "errors": len(results) - len(ok),
+        "average": round(sum(r["score"]["final_score"] for r in ok) / len(ok), 2) if ok else 0,
+        "violations": sum(1 for r in ok if r["score"]["critical_flag"]),
+        "seconds": round(time.time() - started, 1),
+        "path": results_path,
+    }
     print()
-    print("Готово за %.1f сек." % (time.time() - started))
-    print("Записей: %d, оценено: %d, ошибок: %d" % (len(results), len(ok), errors))
-    print("Средний балл: %.2f, диалогов с грубым нарушением: %d" % (average, violations))
+    print("Готово за %.1f сек." % summary["seconds"])
+    print("Записей: %d, оценено: %d, ошибок: %d" % (summary["records"], summary["ok"], summary["errors"]))
+    print("Средний балл: %.2f, диалогов с грубым нарушением: %d" % (summary["average"], summary["violations"]))
     print("Файл:", results_path)
-    expected = EXPECTED_COUNT.get(args.set)
-    if expected and not args.limit and len(results) != expected:
+    expected = EXPECTED_COUNT.get(set_name)
+    if expected and not limit and len(results) != expected:
         print("ВНИМАНИЕ: ожидалось %d записей, получилось %d!" % (expected, len(results)))
     print("Проверка файла: python3 validate.py", results_path)
+    return summary
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Оценка диалогов операторов")
+    parser.add_argument("--set", required=True, choices=["dev", "prod", "demo", "demo-prod"])
+    parser.add_argument("--limit", type=int, default=0, help="оценить только первые N диалогов (для пробы)")
+    parser.add_argument("--workers", type=int, default=4, help="сколько диалогов оценивать одновременно")
+    parser.add_argument("--check", action="store_true",
+                        help="только прочитать диалоги и показать, как они поняты (без ИИ и без ключа)")
+    args = parser.parse_args()
+
+    if args.check:
+        check_input(args.set)
+    else:
+        run_set(args.set, args.limit, args.workers)
 
 
 if __name__ == "__main__":

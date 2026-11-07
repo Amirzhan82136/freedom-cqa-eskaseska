@@ -1,19 +1,20 @@
 // =====================================================================
 // CQA — сайт проверки качества диалогов. Чистый JavaScript, без библиотек.
 // Данные берутся из web/data/dialogs_<набор>.json (их создаёт evaluate.py).
-// Апелляции и решения проверяющего хранятся в localStorage браузера.
+// Если сайт запущен через server.py, работают живые функции: оценка нового диалога,
+// загрузка набора из API и редактор чек-листа. Апелляции хранятся в localStorage браузера.
 // =====================================================================
 
-const SETS = ["dev", "prod", "demo", "demo-prod"];   // какие наборы пробуем загрузить
-const SET_NAMES = { dev: "DEV", prod: "PROD", demo: "DEMO", "demo-prod": "PROD (пример)" };
-const SCALE_MAX = { consultation: 20, dialogue: 10 };
+const SETS = ["live", "dev", "prod", "demo", "demo-prod"];   // какие наборы пробуем загрузить
+const SET_NAMES = { live: "Живая оценка", dev: "DEV", prod: "PROD", demo: "DEMO", "demo-prod": "PROD (пример)" };
 const LANGUAGES = { ru: "Русский", kk: "Қазақша", en: "English" };
 const LANG_CODES = { ru: "RU", kk: "KZ", en: "EN" };
 const ROLES = { client: "Клиент", operator: "Оператор", bot: "Бот", event: "Событие" };
 
 let data = null;          // загруженный набор: { set, model, checklist, dialogs }
 let available = {};       // какие наборы нашлись: { dev: данные, ... }
-let CRITERIA = [];        // чек-лист (приходит из того же файла, что и диалоги)
+let CRITERIA = [];        // рабочий чек-лист: по нему сайт считает баллы (можно менять в разделе «Чек-листы»)
+let SERVER = null;        // ответ server.py (/api/status) или null, если сайт открыт без сервера
 let filters = { onlyCritical: false, onlyErrors: false, language: "all", channel: "all", search: "" };
 let appealTab = "all";
 
@@ -35,19 +36,21 @@ let confirmed = loadStored("cqa_confirmed", {});   // "набор:id" -> оце�
 // =====================================================================
 // Формула балла — ТА ЖЕ, что в scoring.py
 // =====================================================================
-function criterionShare(id, value) {
-  if (id in SCALE_MAX) return value / SCALE_MAX[id];
+// Доля выполнения: Да = 1, Нет = 0, число делим на максимум шкалы (консультация /20, ведение /10)
+function criterionShare(c, value) {
+  const numbers = c.values.filter((v) => typeof v === "number");
+  if (numbers.length) return value / Math.max(...numbers);
   return value === true ? 1 : 0;
 }
 
-function calcScore(values) {
+function calcScore(values, criteria = CRITERIA) {
   let total = 0;
   let totalWeight = 0;
-  for (const c of CRITERIA) {
+  for (const c of criteria) {
     const value = values[c.id];
-    if (c.id === "critical") continue;      // грубые ошибки в сумму не входят
+    if (c.weight === 0) continue;           // грубые ошибки (вес 0) в сумму не входят
     if (value === null || value === undefined) continue;   // N/A — вес "растворяется"
-    total += c.weight * criterionShare(c.id, value);
+    total += c.weight * criterionShare(c, value);
     totalWeight += c.weight;
   }
   let finalScore = 0;
@@ -127,6 +130,7 @@ function showToast(text) {
 // Значения критериев, которые поставил ИИ
 function aiValues(dialog) {
   const values = {};
+  for (const c of CRITERIA) values[c.id] = null;     // критерий, который ИИ не оценивал, = N/A
   for (const c of dialog.result.criteria) values[c.criterion_id] = c.value;
   return values;
 }
@@ -154,39 +158,75 @@ function reviewStatus(dialog) {
 // Загрузка данных и переключение разделов
 // =====================================================================
 async function start() {
+  // запущен ли сайт через server.py (тогда работают живые функции)
+  try {
+    const response = await fetch("/api/status", { cache: "no-store" });
+    if (response.ok) SERVER = await response.json();
+  } catch (e) { SERVER = null; }
+  await loadChecklist();
+  await loadSets();
+  setupModal();
+  setupNewDialogModal();
+  document.getElementById("set-select").addEventListener("change", (event) => {
+    saveStored("cqa_set", event.target.value);
+    useSet(event.target.value);
+    location.hash = "#dialogs";
+    render();
+  });
+  window.addEventListener("hashchange", render);
+  render();
+}
+
+// Рабочий чек-лист: с сервера или из файла checklist.json (если его ещё нет - из набора данных)
+let ACTIVE_CHECKLIST = null;
+let OFFICIAL_CHECKLIST = null;
+async function loadChecklist() {
+  try {
+    const response = await fetch(SERVER ? "/api/checklist" : "../checklist.json", { cache: "no-store" });
+    if (response.ok) {
+      const json = await response.json();
+      ACTIVE_CHECKLIST = json.criteria;
+      OFFICIAL_CHECKLIST = json.official || null;
+    }
+  } catch (e) { ACTIVE_CHECKLIST = null; }
+}
+
+// Загрузить все наборы, которые есть в web/data/
+async function loadSets(preferred) {
+  available = {};
   for (const set of SETS) {
     try {
       const response = await fetch("data/dialogs_" + set + ".json", { cache: "no-store" });
       if (response.ok) available[set] = await response.json();
     } catch (e) { /* такого набора нет */ }
   }
+  if (SERVER && !available.live) {
+    // пустой набор для живой оценки, чтобы было куда добавлять новые диалоги
+    available.live = { set: "live", model: { name: SERVER.model }, checklist: ACTIVE_CHECKLIST || [], dialogs: [] };
+  }
   const select = document.getElementById("set-select");
-  const names = Object.keys(available);
+  const names = SETS.filter((n) => available[n]);
   if (names.length === 0) {
     document.getElementById("app").innerHTML =
-      '<div class="card error-box"><h2>Нет данных</h2>Сначала запустите <b>python3 evaluate.py --set demo</b> ' +
-      "(или dev), затем откройте сайт через <b>python3 -m http.server</b>.</div>";
+      '<div class="card error-box"><h2>Нет данных</h2>Запустите сайт двойным кликом по <b>«Запустить сайт.command»</b> ' +
+      "или командой <b>python3 server.py</b>.</div>";
     return;
   }
   select.innerHTML = names.map((n) =>
     `<option value="${n}">${SET_NAMES[n] || n} · ${available[n].dialogs.length} диалогов</option>`).join("");
-  const saved = loadStored("cqa_set", names[0]);
-  select.value = names.includes(saved) ? saved : names[0];
-  select.addEventListener("change", () => {
-    saveStored("cqa_set", select.value);
-    useSet(select.value);
-    location.hash = "#dialogs";
-    render();
-  });
+  const saved = preferred || loadStored("cqa_set", null);
+  // по умолчанию открываем набор, где есть диалоги
+  const firstFull = names.find((n) => available[n].dialogs.length) || names[0];
+  select.value = names.includes(saved) && available[saved].dialogs.length ? saved : firstFull;
+  if (preferred && names.includes(preferred)) select.value = preferred;
+  saveStored("cqa_set", select.value);
   useSet(select.value);
-  setupModal();
-  window.addEventListener("hashchange", render);
-  render();
 }
 
 function useSet(name) {
   data = available[name];
-  CRITERIA = data.checklist;
+  CRITERIA = ACTIVE_CHECKLIST || data.checklist;
+  if (!OFFICIAL_CHECKLIST) OFFICIAL_CHECKLIST = data.checklist;
   document.getElementById("model-name").textContent = "Модель: " + data.model.name;
   checkFormula();
 }
@@ -195,9 +235,11 @@ function useSet(name) {
 let formulaCheck = { same: 0, total: 0 };
 function checkFormula() {
   formulaCheck = { same: 0, total: 0 };
+  if (data.set === "live") return;   // живые оценки могли считаться по старому чек-листу
   for (const d of data.dialogs.filter(isOk)) {
     formulaCheck.total++;
-    if (calcScore(aiValues(d)).final_score === d.result.score.final_score) formulaCheck.same++;
+    // сравниваем с Python по тому чек-листу, по которому Python считал (из гайда)
+    if (calcScore(aiValues(d), data.checklist).final_score === d.result.score.final_score) formulaCheck.same++;
     else console.warn("Балл не совпал с Python:", d.conversation_id);
   }
 }
@@ -254,6 +296,7 @@ function renderDialogs() {
         <div class="hero-stat"><b>${data.dialogs.length - ok.length}</b><span>ошибок оценки</span></div>
       </div>
     </div>
+    ${liveToolbarHtml()}
     <div class="card">
       <div class="filters">
         <label><input type="checkbox" id="f-critical" ${filters.onlyCritical ? "checked" : ""}> Только нарушения</label>
@@ -291,7 +334,106 @@ function renderDialogs() {
     fillDialogRows();
   };
   app.querySelectorAll(".filters input, .filters select").forEach((el) => el.addEventListener("input", update));
+  setupLiveToolbar();
   fillDialogRows();
+}
+
+// Панель живой оценки: работает, только если сайт запущен через server.py
+function liveToolbarHtml() {
+  if (!SERVER) {
+    return `<div class="card live-bar muted">${icon("spark")} Живая оценка (новый диалог, загрузка DEV/PROD из API)
+      работает, когда сайт запущен через <b>«Запустить сайт.command»</b> или <b>python3 server.py</b>.</div>`;
+  }
+  const keyNote = SERVER.has_key ? "" : `<div class="live-warning">${icon("alert")} Нет ключа модели в .env — ИИ не сможет оценивать.</div>`;
+  return `<div class="card live-bar">
+    <div class="live-title">${icon("spark")} <b>Живая оценка ИИ</b><span class="muted">${esc(SERVER.model)}</span></div>
+    <div class="live-actions">
+      <button class="btn btn-primary" id="btn-new-dialog">${icon("chat")} Оценить новый диалог</button>
+      <button class="btn" data-run="dev">${icon("download")} Загрузить и оценить DEV</button>
+      <button class="btn" data-run="prod">${icon("download")} Загрузить и оценить PROD</button>
+    </div>
+    <div id="job-box" class="hidden"><div class="job-text" id="job-text"></div>
+      <div class="progress"><div id="job-bar"></div></div></div>
+    ${keyNote}
+  </div>`;
+}
+
+function setupLiveToolbar() {
+  const newButton = document.getElementById("btn-new-dialog");
+  if (!newButton) return;
+  newButton.addEventListener("click", openNewDialogModal);
+  document.querySelectorAll("[data-run]").forEach((button) => button.addEventListener("click", async () => {
+    const set = button.dataset.run;
+    if (!confirm("Скачать набор " + set.toUpperCase() + " из API организаторов и оценить его ИИ? Это займёт несколько минут.")) return;
+    const answer = await postJson("/api/run", { set });
+    if (answer.error) return showToast(answer.error);
+    watchJob();
+  }));
+  if (SERVER.job && SERVER.job.running) watchJob();
+}
+
+// Следим за оценкой набора: раз в секунду спрашиваем сервер о прогрессе
+function watchJob() {
+  clearInterval(watchJob.timer);
+  watchJob.timer = setInterval(async () => {
+    let job;
+    try {
+      job = await (await fetch("/api/status", { cache: "no-store" })).json().then((s) => s.job);
+    } catch (e) { return; }
+    const box = document.getElementById("job-box");
+    if (!box) return;
+    box.classList.remove("hidden");
+    const percent = job.total ? Math.round(job.done / job.total * 100) : 3;
+    document.getElementById("job-bar").style.width = percent + "%";
+    document.getElementById("job-text").textContent = `${(job.set || "").toUpperCase()}: ${job.message} `
+      + (job.total ? `${job.done} из ${job.total}, ошибок: ${job.errors}` : "");
+    if (!job.running) {
+      clearInterval(watchJob.timer);
+      if (job.summary) {
+        showToast(`Готово: оценено ${job.summary.ok} из ${job.summary.records}, средний балл ${fmtNum(job.summary.average)}`);
+        await loadSets(job.set);
+        render();
+      }
+    }
+  }, 1000);
+}
+
+// ---------- Окно «Оценить новый диалог» ----------
+function setupNewDialogModal() {
+  document.getElementById("new-cancel").addEventListener("click", () =>
+    document.getElementById("new-modal").classList.add("hidden"));
+  document.getElementById("new-example").addEventListener("click", () => {
+    document.getElementById("new-text").value = [
+      "Клиент: Здравствуйте, как пополнить брокерский счёт с карты?",
+      "Оператор: Здравствуйте! Меня зовут Алина, Freedom Broker. В приложении откройте «Пополнить» и выберите карту.",
+      "Клиент: А комиссия есть?",
+      "Оператор: Комиссии нет, деньги придут за несколько минут. Остались ли вопросы?",
+      "Клиент: Нет, спасибо!",
+      "Оператор: Хорошего дня!",
+    ].join("\n");
+  });
+  document.getElementById("new-save").addEventListener("click", async () => {
+    const button = document.getElementById("new-save");
+    button.disabled = true;
+    button.textContent = "ИИ оценивает диалог…";
+    const answer = await postJson("/api/evaluate", {
+      text: document.getElementById("new-text").value,
+      channel: document.getElementById("new-channel").value,
+      language: document.getElementById("new-language").value,
+    });
+    button.disabled = false;
+    button.textContent = "Оценить";
+    if (answer.error) return showToast(answer.error);
+    document.getElementById("new-modal").classList.add("hidden");
+    await loadSets("live");
+    location.hash = "#dialog/" + encodeURIComponent(answer.conversation_id);
+    render();
+  });
+}
+
+function openNewDialogModal() {
+  document.getElementById("new-modal").classList.remove("hidden");
+  document.getElementById("new-text").focus();
 }
 
 function fillDialogRows() {
@@ -398,6 +540,36 @@ function renderDialog(id) {
       saveStored("cqa_confirmed", confirmed);
       showToast("Оценка подтверждена проверяющим");
     });
+    const reeval = document.getElementById("btn-reeval");
+    if (reeval) reeval.addEventListener("click", () => reevaluate(d, reeval));
+  }
+}
+
+// Отправить диалог ИИ ещё раз по рабочему чек-листу (живая оценка через server.py)
+async function reevaluate(d, button) {
+  button.disabled = true;
+  button.textContent = "ИИ оценивает диалог…";
+  const answer = await postJson("/api/evaluate", { set: data.set, conversation_id: d.conversation_id });
+  if (answer.error) {
+    showToast(answer.error);
+    button.disabled = false;
+    button.textContent = "Переоценить по текущему чек-листу";
+    return;
+  }
+  await loadSets("live");
+  showToast("Готово: новая оценка в наборе «Живая оценка»");
+  location.hash = "#dialog/" + encodeURIComponent(answer.conversation_id);
+  render();
+}
+
+// Отправить JSON на сервер и получить ответ (или {error: "..."})
+async function postJson(url, body) {
+  try {
+    const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify(body) });
+    return await response.json();
+  } catch (e) {
+    return { error: "Сервер не отвечает. Запустите сайт через server.py" };
   }
 }
 
@@ -428,6 +600,10 @@ function scoreCardsHtml(d) {
   const score = calcScore(values).final_score;
   const aiScore = d.result.score.final_score;
   const rationale = {};
+  for (const c of CRITERIA) {
+    rationale[c.id] = { rationale: "ИИ ещё не оценивал этот критерий: он добавлен в чек-лист позже. "
+      + "Нажмите «Переоценить по текущему чек-листу».", evidence_turns: [] };
+  }
   for (const c of d.result.criteria) rationale[c.criterion_id] = c;
 
   // строки критериев: "набрано / вес"
@@ -439,7 +615,7 @@ function scoreCardsHtml(d) {
     } else if (value === null) {
       points = '<span class="badge na">N/A</span>';
     } else {
-      const share = criterionShare(c.id, value);
+      const share = criterionShare(c, value);
       points = `<span style="color:${shareColor(share)}">${fmtNum(c.weight * share)}</span><span class="muted"> / ${c.weight}</span>`;
       bar = `<div class="crit-bar"><div style="width:0;background:${shareColor(share)}" data-width="${share * 100}"></div></div>`;
     }
@@ -459,11 +635,11 @@ function scoreCardsHtml(d) {
   const reasons = CRITERIA.filter((c) => {
     const v = values[c.id];
     if (c.id === "critical") return v === true;
-    return v !== null && criterionShare(c.id, v) < 1;
+    return v !== null && criterionShare(c, v) < 1;
   }).map((c) => {
     const v = values[c.id];
-    const lost = c.id === "critical" ? "грубое нарушение" : "−" + fmtNum(c.weight * (1 - criterionShare(c.id, v))) + " из " + c.weight;
-    const bad = c.id === "critical" || criterionShare(c.id, v) < 0.5;
+    const lost = c.id === "critical" ? "грубое нарушение" : "−" + fmtNum(c.weight * (1 - criterionShare(c, v))) + " из " + c.weight;
+    const bad = c.id === "critical" || criterionShare(c, v) < 0.5;
     return `<div class="reason ${bad ? "bad" : ""}">
       <div class="reason-title"><span>${esc(c.name)}</span><span>${lost}</span></div>
       <p>${esc(rationale[c.id].rationale)}</p>
@@ -497,6 +673,7 @@ function scoreCardsHtml(d) {
       <div class="actions">
         <button class="btn btn-primary" id="btn-appeal">Оспорить оценку</button>
         <button class="btn" id="btn-confirm">Подтвердить оценку</button>
+        ${SERVER ? `<button class="btn" id="btn-reeval">${icon("spark")} Переоценить по текущему чек-листу</button>` : ""}
       </div>
       <div class="ai-note">${icon("spark")} Оценку предложил ИИ. Решение принимает человек.</div>
     </div>
@@ -1001,7 +1178,7 @@ function renderAnalytics() {
       }
       if (v === null) continue;
       applicable++;
-      const share = criterionShare(c.id, v);
+      const share = criterionShare(c, v);
       if (share < 1) { lostCount++; lostPoints += c.weight * (1 - share); examples.push(x); }
     }
     return { c, applicable, lostCount, rate: applicable ? lostCount / applicable : 0,
@@ -1016,13 +1193,13 @@ function renderAnalytics() {
     </div>`).join("");
 
   // 5) матрица качества: строки — диалоги, столбцы — критерии
-  const heatHead = CRITERIA.map((c) => `<div class="heat-head">${SHORT_NAMES[c.id] || c.id}</div>`).join("");
+  const heatHead = CRITERIA.map((c) => `<div class="heat-head">${esc(SHORT_NAMES[c.id] || c.name.slice(0, 9))}</div>`).join("");
   const heatRows = scored.slice().sort((a, b) => a.score - b.score).map((x) => {
     const cells = CRITERIA.map((c) => {
       const v = x.values[c.id];
       let cls = "na", text = "N/A";
       if (c.id === "critical") { cls = v ? "bad" : "good"; text = v ? "!" : "–"; }
-      else if (v !== null) { cls = shareClass(criterionShare(c.id, v)); text = valueLabel(v); }
+      else if (v !== null) { cls = shareClass(criterionShare(c, v)); text = valueLabel(v); }
       return `<div class="heat-cell ${cls}" title="${esc(c.name)}: ${valueLabel(v)}">${text}</div>`;
     }).join("");
     return `<div class="heat-row" data-id="${esc(x.d.conversation_id)}">
@@ -1054,7 +1231,7 @@ function renderAnalytics() {
   }).join("") || '<div class="muted">Потерь баллов нет.</div>';
 
   const advice = topLosses.map((l) => {
-    const [tag, tagName, text] = ADVICE[l.c.id];
+    const [tag, tagName, text] = ADVICE[l.c.id] || ["people", "Сотрудники", "Разобрать этот критерий с операторами на обучении."];
     return `<div class="reco"><span class="tag tag-${tag}">${tagName}</span><div><b>${esc(l.c.name)}</b> — ${Math.round(l.rate * 100)}% диалогов. ${text}</div></div>`;
   }).join("") + `<div class="reco"><span class="tag tag-product">Продукт</span><div>Если клиенты часто спрашивают одно и то же (комиссии, пополнение, вывод), стоит добавить подсказки прямо в приложение — меньше обращений.</div></div>`;
 
@@ -1085,7 +1262,7 @@ function renderAnalytics() {
     <div class="card" style="margin-top:22px">
       <h2>Матрица качества</h2>
       <div class="muted" style="margin:-8px 0 14px">Каждая строка — диалог, каждый столбец — критерий. Нажмите на строку, чтобы открыть диалог.</div>
-      <div class="heatmap"><div class="heat-row heat-header"><div></div>${heatHead}<div></div></div>${heatRows}</div>
+      <div class="heatmap" style="--cols:${CRITERIA.length}"><div class="heat-row heat-header"><div></div>${heatHead}<div></div></div>${heatRows}</div>
     </div>
     <div class="grid-2" style="margin-top:22px">
       <div class="stack">
@@ -1118,32 +1295,139 @@ function renderAnalytics() {
 // =====================================================================
 // 5. Чек-лист
 // =====================================================================
+// Чек-лист можно менять (через server.py): добавить критерий, изменить описание или вес.
+// Изменения сохраняются в checklist.json. Файлы results.json для жюри всегда считаются по чек-листу гайда.
 function renderChecklist() {
-  const rows = CRITERIA.map((c) => `
+  const canEdit = Boolean(SERVER);
+  const totalWeight = CRITERIA.reduce((sum, c) => sum + c.weight, 0);
+  const rows = CRITERIA.map((c, index) => `
     <tr>
-      <td><b>${esc(c.name)}</b><div class="code">${c.id}</div></td>
+      <td class="wrap"><b>${esc(c.name)}</b>${c.official ? '<span class="official-tag">из гайда</span>' : '<span class="custom-tag">свой</span>'}
+        <div class="code">${esc(c.id)}</div></td>
       <td class="wrap">${c.values.map((v) => `<span class="chip" style="margin:2px">${valueLabel(v)}</span>`).join("")}</td>
-      <td style="font-size:20px;font-weight:800;color:var(--green-dark)">${c.weight || "—"}</td>
-      <td class="muted wrap">${esc(c.description)}</td>
+      <td>${canEdit && c.weight > 0
+        ? `<input class="weight-input" type="number" min="1" max="100" value="${c.weight}" data-weight="${index}">`
+        : `<span style="font-size:20px;font-weight:800;color:var(--green-dark)">${c.weight || "—"}</span>`}</td>
+      <td class="muted wrap">${esc(c.description || "")}</td>
+      <td>${canEdit ? `<button class="btn btn-small" data-edit="${index}">Изменить</button>
+        ${c.official ? "" : `<button class="btn btn-small" data-delete="${index}">Удалить</button>`}` : ""}</td>
     </tr>`).join("");
+
   document.getElementById("app").innerHTML = `
-    <div class="page-head"><div><h1>Чек-лист оценки</h1><div class="muted">8 критериев работы оператора</div></div></div>
+    <div class="hero">
+      <div>
+        <div class="hero-kicker">${icon("checklist")} ${CRITERIA.length} критериев · сумма весов ${totalWeight}</div>
+        <h1>Чек-лист <span class="gradient-text">оценки</span></h1>
+        <div class="hero-sub">Критерии, по которым ИИ оценивает работу оператора</div>
+      </div>
+      ${canEdit ? `<div class="editor-actions">
+        <button class="btn btn-primary" id="add-criterion">+ Добавить критерий</button>
+        <button class="btn" id="reset-checklist">Вернуть чек-лист из гайда</button></div>` : ""}
+    </div>
+    <div class="note-box">${canEdit
+      ? "Изменения сразу пересчитывают баллы на сайте по новым весам. Новый критерий ИИ оценит при живой оценке (кнопка «Переоценить по текущему чек-листу» или «Оценить новый диалог»). Официальные results.json для жюри всегда считаются по чек-листу из гайда."
+      : "Чтобы менять чек-лист, запустите сайт через «Запустить сайт.command» (server.py)."}</div>
     <div class="card">
       <div class="table-wrap"><table>
-        <thead><tr><th style="width:230px">Критерий</th><th style="width:220px">Значения</th><th>Вес</th><th>Что проверяем</th></tr></thead>
+        <thead><tr><th style="width:230px">Критерий</th><th style="width:200px">Значения</th><th>Вес</th><th>Что проверяем</th><th></th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
+      ${canEdit ? '<div class="actions"><button class="btn btn-primary" id="save-weights">Сохранить веса</button></div>' : ""}
     </div>
+    <div class="card hidden" id="edit-card" style="margin-top:22px"></div>
     <div class="card" style="margin-top:22px">
       <h2>Как считается итоговый балл</h2>
-      <p>Для каждого критерия берём долю выполнения: <b>Да = 1</b>, <b>Нет = 0</b>, консультация = значение / 20, ведение диалога = значение / 10.</p>
+      <p>Для каждого критерия берём долю выполнения: <b>Да = 1</b>, <b>Нет = 0</b>, число по шкале делим на максимум шкалы (консультация — на 20, ведение диалога — на 10).</p>
       <div class="formula"><b>Итог = Σ (вес × доля) / Σ весов применимых критериев × 100</b>, округляем до 2 знаков.</div>
       <p><b>N/A</b> — критерий не подходит к диалогу. Это не ноль: критерий просто не участвует, его вес распределяется между остальными.</p>
-      <p><b>Грубые ошибки</b> не входят в сумму и не обнуляют балл — это отдельный флаг для руководителя.</p>
-      <p><b>Пример:</b> контакт = Да, потребность = N/A, идентификация = N/A, консультация = 15, эмпатия = Да, ведение = 7, завершение = Да →
-         (10 + 15 + 15 + 10,5 + 5) / 65 × 100 = <b>${fmtNum(calcScore({ contact: true, discovery: null, identification: null, consultation: 15, empathy: true, dialogue: 7, closure: true, critical: false }).final_score)}</b></p>
+      <p><b>Грубые ошибки</b> (вес 0) не входят в сумму и не обнуляют балл — это отдельный флаг для руководителя.</p>
+      <p><b>Пример из гайда:</b> контакт = Да, потребность = N/A, идентификация = N/A, консультация = 15, эмпатия = Да, ведение = 7, завершение = Да →
+         (10 + 15 + 15 + 10,5 + 5) / 65 × 100 = <b>${fmtNum(calcScore({ contact: true, discovery: null, identification: null, consultation: 15, empathy: true, dialogue: 7, closure: true, critical: false }, OFFICIAL_CHECKLIST).final_score)}</b></p>
       <p class="muted">Балл считает код, а не ИИ. Проверка: формула сайта совпала с Python в ${formulaCheck.same} из ${formulaCheck.total} диалогов ${formulaCheck.same === formulaCheck.total ? "✓" : "✗"}</p>
     </div>`;
+
+  if (!canEdit) return;
+  const app = document.getElementById("app");
+  app.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => openCriterionForm(Number(b.dataset.edit))));
+  app.querySelectorAll("[data-delete]").forEach((b) => b.addEventListener("click", () => {
+    const c = CRITERIA[Number(b.dataset.delete)];
+    if (!confirm("Удалить критерий «" + c.name + "»?")) return;
+    saveChecklist(CRITERIA.filter((x) => x !== c));
+  }));
+  document.getElementById("add-criterion").addEventListener("click", () => openCriterionForm(null));
+  document.getElementById("reset-checklist").addEventListener("click", () => {
+    if (!confirm("Вернуть чек-лист из гайда? Свои критерии будут удалены.")) return;
+    saveChecklist(OFFICIAL_CHECKLIST.map((c) => Object.assign({}, c, { official: true })));
+  });
+  document.getElementById("save-weights").addEventListener("click", () => {
+    const list = CRITERIA.map((c) => Object.assign({}, c));
+    app.querySelectorAll("[data-weight]").forEach((input) => { list[Number(input.dataset.weight)].weight = Number(input.value); });
+    saveChecklist(list);
+  });
+}
+
+// Форма «Добавить / изменить критерий». index = null — новый критерий
+function openCriterionForm(index) {
+  const c = index === null ? { id: "", name: "", values: [true, false], weight: 10, description: "" } : CRITERIA[index];
+  const isNew = index === null;
+  const card = document.getElementById("edit-card");
+  const hasNa = c.values.includes(null);
+  const numbers = c.values.filter((v) => typeof v === "number");
+  card.classList.remove("hidden");
+  card.innerHTML = `
+    <h2>${isNew ? "Новый критерий" : "Изменить критерий «" + esc(c.name) + "»"}</h2>
+    <div class="edit-form">
+      <label>Название<input id="f-name" value="${esc(c.name)}" placeholder="Например: Вежливость"></label>
+      <label>Код (латиницей)<input id="f-id" value="${esc(c.id)}" placeholder="politeness" ${isNew ? "" : "disabled"}></label>
+      ${isNew ? `<label>Тип значений
+        <select id="f-type">
+          <option value="yesno">Да / Нет</option>
+          <option value="yesno-na">Да / Нет / N/A</option>
+          <option value="scale">Шкала баллов</option>
+        </select></label>
+      <label>Баллы шкалы (через запятую)<input id="f-scale" value="${numbers.length ? numbers.join(", ") : "0, 5, 10"}"></label>
+      <label class="full" style="flex-direction:row;align-items:center"><input type="checkbox" id="f-na" ${hasNa ? "checked" : ""}> Для шкалы разрешить N/A</label>` : ""}
+      <label>Вес${c.weight === 0 ? " (у грубых ошибок всегда 0)" : ""}<input id="f-weight" type="number" min="1" max="100" value="${c.weight}" ${c.weight === 0 ? "disabled" : ""}></label>
+      <label class="full">Что проверяем (это описание читает ИИ)<textarea id="f-desc" rows="4">${esc(c.description || "")}</textarea></label>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" id="f-save">Сохранить критерий</button>
+      <button class="btn" id="f-cancel">Отмена</button>
+    </div>`;
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("f-cancel").addEventListener("click", () => card.classList.add("hidden"));
+  document.getElementById("f-save").addEventListener("click", () => {
+    const edited = Object.assign({}, c, {
+      name: document.getElementById("f-name").value.trim(),
+      description: document.getElementById("f-desc").value.trim(),
+      weight: c.weight === 0 ? 0 : Number(document.getElementById("f-weight").value),
+    });
+    if (isNew) {
+      edited.id = document.getElementById("f-id").value.trim();
+      edited.official = false;
+      const type = document.getElementById("f-type").value;
+      if (type === "yesno") edited.values = [true, false];
+      if (type === "yesno-na") edited.values = [true, false, null];
+      if (type === "scale") {
+        edited.values = document.getElementById("f-scale").value.split(",").map((x) => Number(x.trim()))
+          .filter((x) => !Number.isNaN(x));
+        if (document.getElementById("f-na").checked) edited.values.push(null);
+      }
+    }
+    const list = CRITERIA.map((x) => Object.assign({}, x));
+    if (isNew) list.push(edited); else list[index] = edited;
+    saveChecklist(list);
+  });
+}
+
+// Сохранить чек-лист на сервере (server.py проверит его) и пересчитать баллы на сайте
+async function saveChecklist(list) {
+  const answer = await postJson("/api/checklist", { criteria: list });
+  if (!answer.ok) return showToast((answer.errors || [answer.error]).join("; "));
+  ACTIVE_CHECKLIST = list;
+  CRITERIA = list;
+  showToast("Чек-лист сохранён, баллы пересчитаны");
+  renderChecklist();
 }
 
 start();

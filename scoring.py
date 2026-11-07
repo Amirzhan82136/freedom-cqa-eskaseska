@@ -3,36 +3,34 @@
 
 import math
 
-from checklist import get_criterion
-
-# Максимум шкалы для числовых критериев
-SCALE_MAX = {"consultation": 20, "dialogue": 10}
+from checklist import CRITERIA
 
 
-def criterion_share(criterion_id, value):
+def criterion_share(criterion, value):
     """Доля выполнения критерия от 0 до 1.
-    true = 1, false = 0, числа делим на максимум шкалы."""
-    if criterion_id in SCALE_MAX:
-        return value / SCALE_MAX[criterion_id]
+    true = 1, false = 0, числа делим на максимум шкалы (consultation: /20, dialogue: /10)."""
+    numbers = [v for v in criterion["values"] if type(v) in (int, float)]
+    if numbers:
+        return value / max(numbers)
     if value is True:
         return 1.0
     return 0.0
 
 
-def calc_score(values):
-    """values - словарь {criterion_id: value}.
+def calc_score(values, criteria=CRITERIA):
+    """values - словарь {criterion_id: value}, criteria - чек-лист (по умолчанию из гайда).
     Возвращает {"final_score": число 0..100, "critical_flag": True/False}."""
     total = 0.0         # набранные баллы (вес * доля)
     total_weight = 0    # сумма весов применимых критериев
 
-    for criterion_id, value in values.items():
-        if criterion_id == "critical":
-            continue    # грубые ошибки в сумму не входят
+    for criterion in criteria:
+        if criterion["weight"] == 0:
+            continue    # грубые ошибки (вес 0) в сумму не входят
+        value = values.get(criterion["id"])
         if value is None:
             continue    # N/A: критерий выбрасываем, его вес "растворяется"
-        weight = get_criterion(criterion_id)["weight"]
-        total += weight * criterion_share(criterion_id, value)
-        total_weight += weight
+        total += criterion["weight"] * criterion_share(criterion, value)
+        total_weight += criterion["weight"]
 
     if total_weight == 0:
         final_score = 0.0   # все критерии N/A - на практике не бывает (contact всегда есть)

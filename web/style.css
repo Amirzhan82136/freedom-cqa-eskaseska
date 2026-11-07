@@ -367,7 +367,7 @@ tbody tr:last-child td { border-bottom: none; }
 /* матрица качества */
 .heatmap { overflow-x: auto; }
 .heat-row {
-  display: grid; grid-template-columns: 170px repeat(8, minmax(64px, 1fr)) 84px;
+  display: grid; grid-template-columns: 170px repeat(var(--cols, 8), minmax(64px, 1fr)) 84px;
   gap: 4px; align-items: center; padding: 2px 0; min-width: 820px; border-radius: 10px; cursor: pointer;
 }
 .heat-row:hover:not(.heat-header) { background: #F4FBF6; }
@@ -430,3 +430,29 @@ tbody tr:last-child td { border-bottom: none; }
   body { font-size: 17px; }
   .transcript { max-height: 760px; }
 }
+
+/* ===== Живая оценка ===== */
+.live-bar { margin-bottom: 22px; padding: 18px 22px; }
+.live-title { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.live-title .i { color: var(--green); }
+.live-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.live-warning { margin-top: 12px; color: var(--red); font-weight: 600; display: flex; gap: 8px; align-items: center; }
+#job-box { margin-top: 14px; }
+.job-text { font-size: 14px; margin-bottom: 6px; font-weight: 600; }
+.progress { height: 10px; background: var(--gray-light); border-radius: 6px; overflow: hidden; }
+.progress div { height: 100%; width: 0; background: var(--gradient); transition: width .5s ease; }
+.btn:disabled { opacity: .6; cursor: wait; }
+.modal-wide { width: min(680px, 94vw); }
+.modal-row { display: flex; gap: 14px; }
+.modal-row label { flex: 1; }
+.modal-card textarea { font-family: inherit; }
+
+/* ===== Редактор чек-листа ===== */
+.editor-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.official-tag { font-size: 11px; font-weight: 750; color: var(--green-dark); background: var(--green-light); padding: 2px 7px; border-radius: 6px; margin-left: 6px; }
+.custom-tag { font-size: 11px; font-weight: 750; color: var(--violet); background: var(--violet-light); padding: 2px 7px; border-radius: 6px; margin-left: 6px; }
+.edit-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+.edit-form .full { grid-column: 1 / -1; }
+.edit-form label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 15px; }
+.note-box { background: var(--blue-light); color: #2F3E9E; border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; font-size: 15px; }
+.weight-input { width: 80px; font-weight: 800; font-size: 18px; color: var(--green-dark); text-align: center; }

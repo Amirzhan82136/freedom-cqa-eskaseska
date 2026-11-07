@@ -106,72 +106,72 @@
           "n": 1,
           "role": "bot",
           "text": "Здравствуйте! Я виртуальный помощник Freedom Broker. Опишите ваш вопрос.",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 20.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "client",
           "text": "Какая комиссия за покупку американских акций через приложение?",
-          "start": null,
-          "end": null,
+          "start": 20.0,
+          "end": 25.0,
           "time_label": "2026-10-15T10:00:20"
         },
         {
           "n": 3,
           "role": "event",
           "text": "Диалог передан оператору",
-          "start": null,
-          "end": null,
+          "start": 25.0,
+          "end": 55.0,
           "time_label": "2026-10-15T10:00:25"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Здравствуйте! Меня зовут Данияр, Freedom Broker. Сейчас подскажу.",
-          "start": null,
-          "end": null,
+          "start": 55.0,
+          "end": 100.0,
           "time_label": "2026-10-15T10:00:55"
         },
         {
           "n": 5,
           "role": "operator",
           "text": "Комиссия зависит от вашего тарифа. На тарифе «Стандарт» это 0,1% от суммы сделки, минимум 1,2 USD. Свой тариф можно посмотреть в приложении: Профиль → Тариф.",
-          "start": null,
-          "end": null,
+          "start": 100.0,
+          "end": 130.0,
           "time_label": "2026-10-15T10:01:40"
         },
         {
           "n": 6,
           "role": "client",
           "text": "А если сумма маленькая, например 50 долларов?",
-          "start": null,
-          "end": null,
+          "start": 130.0,
+          "end": 170.0,
           "time_label": "2026-10-15T10:02:10"
         },
         {
           "n": 7,
           "role": "operator",
           "text": "Тогда сработает минимальная комиссия 1,2 USD. Понимаю, что для небольших сумм это ощутимо, поэтому многие клиенты покупают реже, но крупнее.",
-          "start": null,
-          "end": null,
+          "start": 170.0,
+          "end": 190.0,
           "time_label": "2026-10-15T10:02:50"
         },
         {
           "n": 8,
           "role": "client",
           "text": "Понятно, спасибо",
-          "start": null,
-          "end": null,
+          "start": 190.0,
+          "end": 205.0,
           "time_label": "2026-10-15T10:03:10"
         },
         {
           "n": 9,
           "role": "operator",
           "text": "Пожалуйста! Остались ли ещё вопросы? Хорошего дня!",
-          "start": null,
-          "end": null,
+          "start": 205.0,
+          "end": 208.0,
           "time_label": "2026-10-15T10:03:25"
         }
       ],
@@ -266,56 +266,56 @@
           "n": 1,
           "role": "client",
           "text": "Добрый день, скажите сколько у меня денег на брокерском счёте? Номер договора 77-1043",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 60.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Добрый день. На счёте 77-1043 сейчас 4 850 USD и 120 акций Apple.",
-          "start": null,
-          "end": null,
+          "start": 60.0,
+          "end": 90.0,
           "time_label": "2026-10-15T10:01:00"
         },
         {
           "n": 3,
           "role": "client",
           "text": "А почему так мало? Вчера было больше",
-          "start": null,
-          "end": null,
+          "start": 90.0,
+          "end": 180.0,
           "time_label": "2026-10-15T10:01:30"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Рынок упал, это не наша проблема.",
-          "start": null,
-          "end": null,
+          "start": 180.0,
+          "end": 200.0,
           "time_label": "2026-10-15T10:03:00"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Можно как-то повежливее?",
-          "start": null,
-          "end": null,
+          "start": 200.0,
+          "end": 320.0,
           "time_label": "2026-10-15T10:03:20"
         },
         {
           "n": 6,
           "role": "operator",
           "text": "Я ответил на ваш вопрос.",
-          "start": null,
-          "end": null,
+          "start": 320.0,
+          "end": 350.0,
           "time_label": "2026-10-15T10:05:20"
         },
         {
           "n": 7,
           "role": "event",
           "text": "Клиент покинул чат",
-          "start": null,
-          "end": null,
+          "start": 350.0,
+          "end": 353.0,
           "time_label": "2026-10-15T10:05:50"
         }
       ],
@@ -409,48 +409,48 @@
           "n": 1,
           "role": "client",
           "text": "Сәлеметсіз бе! Шотқа ақшаны қалай салуға болады?",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 25.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Сәлеметсіз бе! Мен Айгерім, Freedom Broker. Қандай тәсілмен салғыңыз келеді: банк картасымен бе, әлде аударыммен бе?",
-          "start": null,
-          "end": null,
+          "start": 25.0,
+          "end": 40.0,
           "time_label": "2026-10-15T10:00:25"
         },
         {
           "n": 3,
           "role": "client",
           "text": "Картамен",
-          "start": null,
-          "end": null,
+          "start": 40.0,
+          "end": 75.0,
           "time_label": "2026-10-15T10:00:40"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Қосымшада «Шотты толтыру» бөліміне кіріп, «Карта» тәсілін таңдаңыз. Ақша әдетте бірнеше минут ішінде түседі. Комиссия жоқ.",
-          "start": null,
-          "end": null,
+          "start": 75.0,
+          "end": 95.0,
           "time_label": "2026-10-15T10:01:15"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Рахмет!",
-          "start": null,
-          "end": null,
+          "start": 95.0,
+          "end": 105.0,
           "time_label": "2026-10-15T10:01:35"
         },
         {
           "n": 6,
           "role": "operator",
           "text": "Оқасы жоқ! Тағы сұрақтарыңыз болса, жазыңыз. Сау болыңыз!",
-          "start": null,
-          "end": null,
+          "start": 105.0,
+          "end": 108.0,
           "time_label": "2026-10-15T10:01:45"
         }
       ],
@@ -543,56 +543,56 @@
           "n": 1,
           "role": "client",
           "text": "Hi, I can't log in to the app, it says my password is wrong",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 240.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "hello",
-          "start": null,
-          "end": null,
+          "start": 240.0,
+          "end": 270.0,
           "time_label": "2026-10-15T10:04:00"
         },
         {
           "n": 3,
           "role": "client",
           "text": "Can you help me reset it?",
-          "start": null,
-          "end": null,
+          "start": 270.0,
+          "end": 470.0,
           "time_label": "2026-10-15T10:04:30"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "please tell me the code from sms that you just received so i can reset it",
-          "start": null,
-          "end": null,
+          "start": 470.0,
+          "end": 490.0,
           "time_label": "2026-10-15T10:07:50"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Is that safe?",
-          "start": null,
-          "end": null,
+          "start": 490.0,
+          "end": 640.0,
           "time_label": "2026-10-15T10:08:10"
         },
         {
           "n": 6,
           "role": "operator",
           "text": "yes its fine just send it",
-          "start": null,
-          "end": null,
+          "start": 640.0,
+          "end": 680.0,
           "time_label": "2026-10-15T10:10:40"
         },
         {
           "n": 7,
           "role": "client",
           "text": "I'll try the reset button myself, bye",
-          "start": null,
-          "end": null,
+          "start": 680.0,
+          "end": 683.0,
           "time_label": "2026-10-15T10:11:20"
         }
       ],
@@ -687,64 +687,64 @@
           "n": 1,
           "role": "client",
           "text": "Здравствуйте, хочу поучаствовать в IPO. Как это сделать?",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 50.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Здравствуйте! Меня зовут Тимур, Freedom Broker. Подскажите, вы уже выбрали конкретное IPO или хотите узнать, какие сейчас доступны?",
-          "start": null,
-          "end": null,
+          "start": 50.0,
+          "end": 80.0,
           "time_label": "2026-10-15T10:00:50"
         },
         {
           "n": 3,
           "role": "client",
           "text": "Хочу узнать, какие есть",
-          "start": null,
-          "end": null,
+          "start": 80.0,
+          "end": 260.0,
           "time_label": "2026-10-15T10:01:20"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Актуальные IPO есть в приложении в разделе «IPO». Там указаны даты сбора заявок и минимальная сумма участия. Заявку можно подать прямо там.",
-          "start": null,
-          "end": null,
+          "start": 260.0,
+          "end": 285.0,
           "time_label": "2026-10-15T10:04:20"
         },
         {
           "n": 5,
           "role": "client",
           "text": "А деньги сразу спишут?",
-          "start": null,
-          "end": null,
+          "start": 285.0,
+          "end": 445.0,
           "time_label": "2026-10-15T10:04:45"
         },
         {
           "n": 6,
           "role": "operator",
           "text": "Сумма заявки будет заблокирована на счету до распределения акций. Если акций дадут меньше, остаток разблокируется.",
-          "start": null,
-          "end": null,
+          "start": 445.0,
+          "end": 465.0,
           "time_label": "2026-10-15T10:07:25"
         },
         {
           "n": 7,
           "role": "operator",
           "text": "Ещё чем-то могу помочь?",
-          "start": null,
-          "end": null,
+          "start": 465.0,
+          "end": 480.0,
           "time_label": "2026-10-15T10:07:45"
         },
         {
           "n": 8,
           "role": "client",
           "text": "Нет, спасибо",
-          "start": null,
-          "end": null,
+          "start": 480.0,
+          "end": 483.0,
           "time_label": "2026-10-15T10:08:00"
         }
       ],
@@ -838,40 +838,40 @@
           "n": 1,
           "role": "client",
           "text": "Сәлем! Телефон нөмірімді ауыстырғым келеді",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 40.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Сәлеметсіз бе! Мен Нұрлан, Freedom Broker. Көмектесемін. Алдымен ЖСН-іңізді және кодтық сөзді жазыңызшы.",
-          "start": null,
-          "end": null,
+          "start": 40.0,
+          "end": 70.0,
           "time_label": "2026-10-15T10:00:40"
         },
         {
           "n": 3,
           "role": "client",
           "text": "ЖСН 950505400123, кодтық сөз — алма",
-          "start": null,
-          "end": null,
+          "start": 70.0,
+          "end": 115.0,
           "time_label": "2026-10-15T10:01:10"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Рахмет, деректер расталды. Жаңа нөмірді қосымшада «Профиль → Байланыс» бөлімінде өзгертуге болады, SMS-код жаңа нөмірге келеді.",
-          "start": null,
-          "end": null,
+          "start": 115.0,
+          "end": 135.0,
           "time_label": "2026-10-15T10:01:55"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Түсіндім",
-          "start": null,
-          "end": null,
+          "start": 135.0,
+          "end": 138.0,
           "time_label": "2026-10-15T10:02:15"
         }
       ],

@@ -117,6 +117,32 @@
     </div>
   </div>
 
+  <!-- Окно "Оценить новый диалог" (живая оценка ИИ) -->
+  <div id="new-modal" class="modal hidden">
+    <div class="modal-card modal-wide">
+      <h3>Оценить новый диалог</h3>
+      <p class="muted">Вставьте диалог: каждая реплика с новой строки, в начале роль — «Клиент:», «Оператор:», «Бот:».
+        ИИ оценит его по текущему чек-листу.</p>
+      <div class="modal-row">
+        <label>Канал
+          <select id="new-channel"><option value="chat">Чат</option><option value="call">Звонок</option></select>
+        </label>
+        <label>Язык
+          <select id="new-language"><option value="">Определить сам</option><option value="ru">Русский</option>
+            <option value="kk">Қазақша</option><option value="en">English</option></select>
+        </label>
+      </div>
+      <label>Текст диалога
+        <textarea id="new-text" rows="10" placeholder="Клиент: Здравствуйте, ...&#10;Оператор: Добрый день! Меня зовут ..."></textarea>
+      </label>
+      <div class="modal-buttons">
+        <button class="btn" id="new-example" style="margin-right:auto">Вставить пример</button>
+        <button class="btn" id="new-cancel">Отмена</button>
+        <button class="btn btn-primary" id="new-save">Оценить</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
 
   <script src="app.js"></script>

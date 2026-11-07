@@ -106,48 +106,48 @@
           "n": 1,
           "role": "client",
           "text": "Добрый вечер! Хочу купить облигации, но не понимаю, с чего начать",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 35.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Добрый вечер! Меня зовут Асель, Freedom Broker. Подскажите, вас интересуют облигации Казахстана или зарубежные? И на какой срок планируете вложение?",
-          "start": null,
-          "end": null,
+          "start": 35.0,
+          "end": 65.0,
           "time_label": "2026-10-15T10:00:35"
         },
         {
           "n": 3,
           "role": "client",
           "text": "Казахстанские, примерно на год",
-          "start": null,
-          "end": null,
+          "start": 65.0,
+          "end": 125.0,
           "time_label": "2026-10-15T10:01:05"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Тогда подойдут государственные облигации или облигации крупных компаний на KASE. В приложении откройте «Рынки → Облигации», включите фильтр «KASE» и срок погашения до 1 года. Там видна доходность к погашению.",
-          "start": null,
-          "end": null,
+          "start": 125.0,
+          "end": 165.0,
           "time_label": "2026-10-15T10:02:05"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Отлично, нашла. Спасибо!",
-          "start": null,
-          "end": null,
+          "start": 165.0,
+          "end": 180.0,
           "time_label": "2026-10-15T10:02:45"
         },
         {
           "n": 6,
           "role": "operator",
           "text": "Рада помочь! Если появятся вопросы, пишите. Хорошего вечера!",
-          "start": null,
-          "end": null,
+          "start": 180.0,
+          "end": 183.0,
           "time_label": "2026-10-15T10:03:00"
         }
       ],
@@ -239,88 +239,88 @@
           "n": 1,
           "role": "bot",
           "text": "Здравствуйте! Выберите тему: 1 — счёт, 2 — документы, 3 — другое",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 10.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "client",
           "text": "2",
-          "start": null,
-          "end": null,
+          "start": 10.0,
+          "end": 15.0,
           "time_label": "2026-10-15T10:00:10"
         },
         {
           "n": 3,
           "role": "event",
           "text": "Диалог передан оператору",
-          "start": null,
-          "end": null,
+          "start": 15.0,
+          "end": 255.0,
           "time_label": "2026-10-15T10:00:15"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Здравствуйте, меня зовут Ильяс. Какой документ вам нужен?",
-          "start": null,
-          "end": null,
+          "start": 255.0,
+          "end": 275.0,
           "time_label": "2026-10-15T10:04:15"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Справка о доходах для налоговой за прошлый год",
-          "start": null,
-          "end": null,
+          "start": 275.0,
+          "end": 475.0,
           "time_label": "2026-10-15T10:04:35"
         },
         {
           "n": 6,
           "role": "operator",
           "text": "Для этого нужно подтвердить личность. Напишите, пожалуйста, ИИН и кодовое слово",
-          "start": null,
-          "end": null,
+          "start": 475.0,
+          "end": 505.0,
           "time_label": "2026-10-15T10:07:55"
         },
         {
           "n": 7,
           "role": "client",
           "text": "890101300111, кодовое слово «весна»",
-          "start": null,
-          "end": null,
+          "start": 505.0,
+          "end": 685.0,
           "time_label": "2026-10-15T10:08:25"
         },
         {
           "n": 8,
           "role": "operator",
           "text": "Спасибо. Справку сформирую, она придёт на email из профиля в течение 2 рабочих дней.",
-          "start": null,
-          "end": null,
+          "start": 685.0,
+          "end": 705.0,
           "time_label": "2026-10-15T10:11:25"
         },
         {
           "n": 9,
           "role": "operator",
           "text": "Есть ли ещё вопросы?",
-          "start": null,
-          "end": null,
+          "start": 705.0,
+          "end": 715.0,
           "time_label": "2026-10-15T10:11:45"
         },
         {
           "n": 10,
           "role": "client",
           "text": "Нет",
-          "start": null,
-          "end": null,
+          "start": 715.0,
+          "end": 725.0,
           "time_label": "2026-10-15T10:11:55"
         },
         {
           "n": 11,
           "role": "operator",
           "text": "Всего доброго!",
-          "start": null,
-          "end": null,
+          "start": 725.0,
+          "end": 728.0,
           "time_label": "2026-10-15T10:12:05"
         }
       ],
@@ -415,48 +415,48 @@
           "n": 1,
           "role": "client",
           "text": "Сәлеметсіз бе! Брокерлік шоттан банк шотына ақша аударуға бола ма?",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 40.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Здравствуйте! Меня зовут Олжас. Да, можно: в приложении «Вывод средств» → выберите счёт в банке.",
-          "start": null,
-          "end": null,
+          "start": 40.0,
+          "end": 70.0,
           "time_label": "2026-10-15T10:00:40"
         },
         {
           "n": 3,
           "role": "client",
           "text": "Қазақша жаза аласыз ба?",
-          "start": null,
-          "end": null,
+          "start": 70.0,
+          "end": 105.0,
           "time_label": "2026-10-15T10:01:10"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Әрине, кешіріңіз! Қосымшада «Қаражатты шығару» бөлімін ашып, банк шотын таңдаңыз. Ақша бір жұмыс күні ішінде түседі.",
-          "start": null,
-          "end": null,
+          "start": 105.0,
+          "end": 125.0,
           "time_label": "2026-10-15T10:01:45"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Рахмет",
-          "start": null,
-          "end": null,
+          "start": 125.0,
+          "end": 135.0,
           "time_label": "2026-10-15T10:02:05"
         },
         {
           "n": 6,
           "role": "operator",
           "text": "Оқасы жоқ, сау болыңыз!",
-          "start": null,
-          "end": null,
+          "start": 135.0,
+          "end": 138.0,
           "time_label": "2026-10-15T10:02:15"
         }
       ],
@@ -548,40 +548,40 @@
           "n": 1,
           "role": "client",
           "text": "Hello! What is the commission for trading US options?",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 40.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Hi, I'm Arman from Freedom Broker. The commission is 0.1% of the trade amount.",
-          "start": null,
-          "end": null,
+          "start": 40.0,
+          "end": 70.0,
           "time_label": "2026-10-15T10:00:40"
         },
         {
           "n": 3,
           "role": "client",
           "text": "Are you sure? I read it is per contract",
-          "start": null,
-          "end": null,
+          "start": 70.0,
+          "end": 160.0,
           "time_label": "2026-10-15T10:01:10"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Sorry, you are right. For options it is 0.65 USD per contract. My mistake.",
-          "start": null,
-          "end": null,
+          "start": 160.0,
+          "end": 180.0,
           "time_label": "2026-10-15T10:02:40"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Ok, thanks",
-          "start": null,
-          "end": null,
+          "start": 180.0,
+          "end": 183.0,
           "time_label": "2026-10-15T10:03:00"
         }
       ],
@@ -673,48 +673,48 @@
           "n": 1,
           "role": "client",
           "text": "Здравствуйте! Почему у меня приложение вылетает при входе уже второй день???",
-          "start": null,
-          "end": null,
+          "start": 0.0,
+          "end": 60.0,
           "time_label": "2026-10-15T10:00:00"
         },
         {
           "n": 2,
           "role": "operator",
           "text": "Здравствуйте, Freedom Broker, Дана.",
-          "start": null,
-          "end": null,
+          "start": 60.0,
+          "end": 90.0,
           "time_label": "2026-10-15T10:01:00"
         },
         {
           "n": 3,
           "role": "client",
           "text": "Так что мне делать? Мне нужно продать акции",
-          "start": null,
-          "end": null,
+          "start": 90.0,
+          "end": 390.0,
           "time_label": "2026-10-15T10:01:30"
         },
         {
           "n": 4,
           "role": "operator",
           "text": "Обновите приложение.",
-          "start": null,
-          "end": null,
+          "start": 390.0,
+          "end": 410.0,
           "time_label": "2026-10-15T10:06:30"
         },
         {
           "n": 5,
           "role": "client",
           "text": "Уже обновил, не помогает!",
-          "start": null,
-          "end": null,
+          "start": 410.0,
+          "end": 650.0,
           "time_label": "2026-10-15T10:06:50"
         },
         {
           "n": 6,
           "role": "event",
           "text": "Оператор закрыл чат",
-          "start": null,
-          "end": null,
+          "start": 650.0,
+          "end": 653.0,
           "time_label": "2026-10-15T10:10:50"
         }
       ],
