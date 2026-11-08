@@ -9,7 +9,8 @@
 | Набор | Файл | Итог |
 |---|---|---|
 | DEV (60 чатов + 5 звонков, RU/KZ/EN) | `results/dev/results.json` | 65/65 оценено, 0 ошибок, средний балл 85,54, грубых ошибок 5 |
-| PROD (10 контрольных чатов) | `results/prod/results.json` | — |
+| PROD (10 контрольных чатов, `group_id=FBroker`) | `results/prod/results.json` | 10/10 оценено, 0 ошибок, средний балл 73,03, грубых ошибок 2 |
+| SWAP (дополнительный набор, 3 чата, `group_id=Swap`) | `results/swap/results.json` | хранится отдельно, в PROD не добавляется |
 
 Формат файлов — JSON 1.0 из приложения к гайду (`docs/`): одна запись на диалог, ровно 8 критериев, `evidence_turns` по исходному массиву транскрипта, при сбое — `status: "error"`, а не ноль.
 
@@ -44,7 +45,7 @@
 pip3 install -r requirements.txt
 cp .env.example .env          # ключ модели и ссылка API организаторов
 python3 test_scoring.py
-python3 evaluate.py --set dev  # или --set prod --group-id <значение>
+python3 evaluate.py --set dev  # или --set prod --group-id FBroker, --set swap
 python3 validate.py results/dev/results.json
 python3 server.py              # сайт, откроется в браузере
 ```

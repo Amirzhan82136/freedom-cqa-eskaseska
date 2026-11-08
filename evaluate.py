@@ -3,6 +3,7 @@
 # Запуск:
 #   python3 evaluate.py --set dev     -> results/dev/results.json
 #   python3 evaluate.py --set prod    -> results/prod/results.json
+#   python3 evaluate.py --set swap    -> results/swap/results.json (дополнительный набор, отдельно от PROD)
 #   python3 evaluate.py --set demo       -> демо-данные для сайта (без ключа, из кэша)
 #   python3 evaluate.py --set demo-prod  -> пример PROD для сайта (тоже демо)
 
@@ -244,7 +245,8 @@ def group_id_for(set_name, group_id=None):
     """Какой group_id спрашивать у API: явно заданный, из .env (CQA_GROUP_ID_PROD) или DEV/PROD."""
     if group_id:
         return group_id
-    return os.getenv("CQA_GROUP_ID_" + set_name.upper()) or set_name.upper()
+    default = "Swap" if set_name == "swap" else set_name.upper()
+    return os.getenv("CQA_GROUP_ID_" + set_name.upper()) or default
 
 
 def load_dialogs(set_name, group_id=None):
@@ -728,7 +730,7 @@ def run_set(set_name, limit=0, workers=WORKERS, on_progress=None, group_id=None)
 
 def main():
     parser = argparse.ArgumentParser(description="Оценка диалогов операторов")
-    parser.add_argument("--set", required=True, choices=["dev", "prod", "demo", "demo-prod"])
+    parser.add_argument("--set", required=True, choices=["dev", "prod", "swap", "demo", "demo-prod"])
     parser.add_argument("--limit", type=int, default=0, help="оценить только первые N диалогов (для пробы)")
     parser.add_argument("--workers", type=int, default=WORKERS, help="сколько диалогов оценивать одновременно")
     parser.add_argument("--check", action="store_true",

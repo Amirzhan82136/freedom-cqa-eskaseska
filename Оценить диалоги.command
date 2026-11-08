@@ -6,15 +6,19 @@
 cd "$(dirname "$0")"
 
 echo ""
-read -p "Какой набор оценить? Напишите dev или prod и нажмите Enter: " SET
-if [ "$SET" != "dev" ] && [ "$SET" != "prod" ]; then
-  echo "Нужно написать dev или prod."
+read -p "Какой набор оценить? Напишите dev, prod или swap и нажмите Enter: " SET
+if [ "$SET" != "dev" ] && [ "$SET" != "prod" ] && [ "$SET" != "swap" ]; then
+  echo "Нужно написать dev, prod или swap."
   read -p "Нажмите Enter, чтобы закрыть окно"
   exit 1
 fi
 mkdir -p "data/$SET"
-GROUP_ID=$(echo "$SET" | tr a-z A-Z)
-read -p "Значение group_id для API (Enter = $GROUP_ID; для PROD его сообщат организаторы): " ANSWER
+case "$SET" in
+  prod) GROUP_ID="FBroker" ;;
+  swap) GROUP_ID="Swap" ;;
+  *) GROUP_ID="DEV" ;;
+esac
+read -p "Значение group_id для API (Enter = $GROUP_ID): " ANSWER
 if [ -n "$ANSWER" ]; then GROUP_ID="$ANSWER"; fi
 
 echo ""

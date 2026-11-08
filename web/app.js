@@ -5,8 +5,8 @@
 // загрузка набора из API и редактор чек-листа. Апелляции хранятся в localStorage браузера.
 // =====================================================================
 
-const SETS = ["live", "dev", "prod", "demo", "demo-prod"];   // какие наборы пробуем загрузить
-const SET_NAMES = { live: "Живая оценка", dev: "DEV", prod: "PROD", demo: "DEMO", "demo-prod": "PROD (пример)" };
+const SETS = ["live", "dev", "prod", "swap", "demo", "demo-prod"];   // какие наборы пробуем загрузить
+const SET_NAMES = { live: "Живая оценка", dev: "DEV", prod: "PROD", swap: "SWAP", demo: "DEMO", "demo-prod": "PROD (пример)" };
 const LANGUAGES = { ru: "Русский", kk: "Қазақша", en: "English" };
 const LANG_CODES = { ru: "RU", kk: "KZ", en: "EN" };
 const ROLES = { client: "Клиент", operator: "Оператор", bot: "Бот", event: "Событие" };
@@ -351,6 +351,7 @@ function liveToolbarHtml() {
       <button class="btn btn-primary" id="btn-new-dialog">${icon("chat")} Оценить новый диалог</button>
       <button class="btn" data-run="dev">${icon("download")} Загрузить и оценить DEV</button>
       <button class="btn" data-run="prod">${icon("download")} Загрузить и оценить PROD</button>
+      <button class="btn" data-run="swap">${icon("download")} Загрузить и оценить SWAP</button>
     </div>
     <div id="job-box" class="hidden"><div class="job-text" id="job-text"></div>
       <div class="progress"><div id="job-bar"></div></div></div>
@@ -365,9 +366,8 @@ function setupLiveToolbar() {
   document.querySelectorAll("[data-run]").forEach((button) => button.addEventListener("click", async () => {
     const set = button.dataset.run;
     // для контрольного набора организаторы сообщат своё значение group_id
-    const groupId = prompt(set === "prod"
-      ? "Введите group_id контрольного набора — его сообщат организаторы:"
-      : "Значение group_id для набора DEV:", set === "prod" ? "" : "DEV");
+    const defaults = { dev: "DEV", prod: "FBroker", swap: "Swap" };
+    const groupId = prompt(`Значение group_id для набора ${SET_NAMES[set]} (от организаторов):`, defaults[set]);
     if (groupId === null) return;
     if (!groupId.trim()) return showToast("Нужно ввести group_id, который дали организаторы");
     const answer = await postJson("/api/run", { set, group_id: groupId });

@@ -1,0 +1,721 @@
+{
+  "set": "swap",
+  "model": {
+    "mode": "external_api",
+    "name": "gemini-3.5-flash-lite"
+  },
+  "checklist": [
+    {
+      "id": "contact",
+      "name": "Установление контакта",
+      "values": [
+        true,
+        false
+      ],
+      "weight": 10,
+      "description": "true, если в первой реплике оператор поздоровался и представился (имя и/или компания). false, если нет приветствия или представления. Приветствие бота не считается."
+    },
+    {
+      "id": "discovery",
+      "name": "Выявление потребности",
+      "values": [
+        true,
+        false,
+        null
+      ],
+      "weight": 15,
+      "description": "true, если оператор задал уточняющие вопросы там, где запрос был неясен или нужны детали, и понял настоящую потребность клиента. false, если уточнить было нужно, а оператор не уточнил или ответил не на тот вопрос. null (N/A), если клиент сразу полностью и ясно изложил вопрос или ушёл раньше, чем оператор мог что-то выяснить."
+    },
+    {
+      "id": "identification",
+      "name": "Идентификация",
+      "values": [
+        true,
+        false,
+        null
+      ],
+      "weight": 20,
+      "description": "Нужна, если вопрос касается конкретного счёта, денег, сделок, документов или персональных данных клиента. true - оператор провёл или потребовал проверку личности ДО того, как смотреть или раскрывать данные клиента (в том числе отказался раскрывать данные без проверки; событие «личность подтверждена» тоже считается). false - данные клиента раскрыты или операция сделана без проверки. null (N/A) - общий вопрос о продуктах, тарифах, инструкциях, где данные клиента не нужны."
+    },
+    {
+      "id": "consultation",
+      "name": "Корректность и полнота",
+      "values": [
+        0,
+        5,
+        10,
+        15,
+        20,
+        null
+      ],
+      "weight": 20,
+      "description": "Ответил ли оператор правильно и на ВСЕ вопросы клиента, включая уточняющие и дополнительные. 20 - все вопросы решены верно и полно; 15 - основное решено, упущена деталь или следующий шаг; 10 - ответ частичный: один из вопросов клиента остался без ответа, или оператор не объяснил, что делать дальше; 5 - ответ формальный: повторил ответ бота или общую фразу и не ответил на сам вопрос; 0 - ответа нет или он неверный/вредный. null (N/A) - консультации не было (клиент ушёл до вопроса)."
+    },
+    {
+      "id": "empathy",
+      "name": "Эмпатия",
+      "values": [
+        true,
+        false
+      ],
+      "weight": 15,
+      "description": "true - оператор вежлив и внимателен к клиенту, при беспокойстве или недовольстве клиента признаёт его чувства. false - ответы сухие и отстранённые там, где клиент волнуется или недоволен; оператор игнорирует вопрос или эмоцию клиента, отвечает пренебрежительно («я уже указал», «это не наша проблема»)."
+    },
+    {
+      "id": "dialogue",
+      "name": "Ведение, скорость, грамотность",
+      "values": [
+        0,
+        4,
+        7,
+        10
+      ],
+      "weight": 15,
+      "description": "Как оператор ведёт разговор: отвечает без долгих пауз (смотри время реплик), по делу, логично, без ошибок и повторов, доводит разговор до результата. 10 - отлично; 7 - мелкие недочёты (пауза больше 2 минут, повтор, шаблонная фраза вместо ответа); 4 - заметные проблемы (несколько долгих пауз, вопрос клиента проигнорирован, сумбур); 0 - диалог фактически не ведётся. В звонках не наказывай за ошибки распознавания речи."
+    },
+    {
+      "id": "closure",
+      "name": "Завершение",
+      "values": [
+        true,
+        false,
+        null
+      ],
+      "weight": 5,
+      "description": "true - оператор корректно завершил: убедился, что вопросы решены (или предложил помощь), и попрощался. false - оператор закончил разговор, когда у клиента оставался вопрос, или ушёл без прощания. null (N/A) - разговор оборвал клиент или связь прервалась до того, как оператор мог его завершить."
+    },
+    {
+      "id": "critical",
+      "name": "Грубые ошибки",
+      "values": [
+        true,
+        false
+      ],
+      "weight": 0,
+      "description": "true только при явном серьёзном нарушении в репликах оператора: грубость или оскорбление, раскрытие данных клиента без идентификации, заведомо ложная или опасная информация, гарантия доходности, просьба сообщить пароль или код из SMS. Слабая консультация, паузы и сухой тон - это не грубая ошибка. Иначе false."
+    }
+  ],
+  "dialogs": [
+    {
+      "conversation_id": "p3-ru-001",
+      "channel": "chat",
+      "language": "ru",
+      "audio": null,
+      "turns": [
+        {
+          "n": 1,
+          "role": "client",
+          "text": "Где в приложении скачать брокерский отчёт за прошлый месяц? В разделе с портфелем не вижу.",
+          "start": 0.0,
+          "end": 2.0,
+          "time_label": "00:00"
+        },
+        {
+          "n": 2,
+          "role": "bot",
+          "text": "Здравствуйте! Я AIM, AI-ассистент Freedom Broker. Я могу ответить на вопросы о продуктах и услугах, предоставить информацию по вашим счетам, активам и комиссиям, сравнить данные в таблице, отправить контакты вашего менеджера и передать вопрос специалистам поддержки.",
+          "start": 2.0,
+          "end": 2.0,
+          "time_label": "00:02"
+        },
+        {
+          "n": 3,
+          "role": "bot",
+          "text": "Продолжая разговор, Вы соглашаетесь на сбор и обработку персональных данных и подтверждаете, что ознакомились с Политикой конфиденциальности Компании.",
+          "start": 2.0,
+          "end": 9.0,
+          "time_label": "00:02"
+        },
+        {
+          "n": 4,
+          "role": "bot",
+          "text": "Отчёт брокера доступен в разделе «Отчёты и документы».",
+          "start": 9.0,
+          "end": 29.0,
+          "time_label": "00:09"
+        },
+        {
+          "n": 5,
+          "role": "client",
+          "text": "Можно подключить оператора? Хочу уточнить, что выбрать дальше.",
+          "start": 29.0,
+          "end": 31.0,
+          "time_label": "00:29"
+        },
+        {
+          "n": 6,
+          "role": "bot",
+          "text": "Желаете, чтобы я соединил Вас с оператором?",
+          "start": 31.0,
+          "end": 37.0,
+          "time_label": "00:31"
+        },
+        {
+          "n": 7,
+          "role": "client",
+          "text": "да",
+          "start": 37.0,
+          "end": 38.0,
+          "time_label": "00:37"
+        },
+        {
+          "n": 8,
+          "role": "bot",
+          "text": "Пожалуйста, ожидайте. Оператор скоро подключится к чату.",
+          "start": 38.0,
+          "end": 40.0,
+          "time_label": "00:38"
+        },
+        {
+          "n": 9,
+          "role": "event",
+          "text": "Эскалация на оператора.",
+          "start": 40.0,
+          "end": 82.0,
+          "time_label": "00:40"
+        },
+        {
+          "n": 10,
+          "role": "operator",
+          "text": "Здравствуйте! Меня зовут Дарья, поддержка Freedom Broker. Откройте «Меню → Отчёты и документы → Отчёт брокера».",
+          "start": 82.0,
+          "end": 100.0,
+          "time_label": "01:22"
+        },
+        {
+          "n": 11,
+          "role": "client",
+          "text": "Открылось окно с датами.",
+          "start": 100.0,
+          "end": 125.0,
+          "time_label": "01:40"
+        },
+        {
+          "n": 12,
+          "role": "operator",
+          "text": "Выберите нужный период и скачайте отчёт. Этот документы будет за выбранные даты.",
+          "start": 125.0,
+          "end": 157.0,
+          "time_label": "02:05"
+        },
+        {
+          "n": 13,
+          "role": "client",
+          "text": "Скачал, всё получилось.",
+          "start": 157.0,
+          "end": 173.0,
+          "time_label": "02:37"
+        },
+        {
+          "n": 14,
+          "role": "operator",
+          "text": "Рада, что получилось. До свидания!",
+          "start": 173.0,
+          "end": 176.0,
+          "time_label": "02:53"
+        }
+      ],
+      "result": {
+        "conversation_id": "p3-ru-001",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": true,
+            "rationale": "Оператор поздоровалась, назвала своё имя и компанию в первой реплике.",
+            "evidence_turns": [
+              10
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": null,
+            "rationale": "Клиент сразу чётко описал проблему, потребности в дополнительном выявлении не было.",
+            "evidence_turns": [
+              1
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": null,
+            "rationale": "Вопрос касался общей навигации по приложению, персональные данные или счета не запрашивались.",
+            "evidence_turns": [
+              10
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 20,
+            "rationale": "Оператор дала точную и полную инструкцию, решив вопрос клиента.",
+            "evidence_turns": [
+              10,
+              12
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Оператор общалась вежливо и корректно.",
+            "evidence_turns": [
+              10,
+              14
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 10,
+            "rationale": "Диалог велся грамотно, вся необходимая информация предоставлена, результат достигнут.",
+            "evidence_turns": [
+              10,
+              12,
+              14
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": true,
+            "rationale": "Оператор убедилась, что проблема решена, и корректно попрощалась.",
+            "evidence_turns": [
+              14
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": false,
+            "rationale": "Грубых ошибок, нарушений регламента или угроз безопасности в диалоге нет.",
+            "evidence_turns": [
+              10,
+              12,
+              14
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 100.0,
+          "critical_flag": false
+        }
+      }
+    },
+    {
+      "conversation_id": "p3-kz-001",
+      "channel": "chat",
+      "language": "kk",
+      "audio": null,
+      "turns": [
+        {
+          "n": 1,
+          "role": "client",
+          "text": "Қосымшада облигацияны тикерімен қалай табамын? Тапқаннан кейін сатып алуға өтінімді қалай жіберемін?",
+          "start": 0.0,
+          "end": 2.0,
+          "time_label": "00:00"
+        },
+        {
+          "n": 2,
+          "role": "bot",
+          "text": "Сәлеметсіз бе! Мен AIM, Freedom Broker компаниясының жасанды интеллект көмекшісімін. Өнімдер мен қызметтер туралы сұрақтарға жауап бере аламын, шоттарыңыз, активтеріңіз және комиссиялар туралы ақпарат бере аламын, деректерді кестеде салыстыра аламын, менеджеріңіздің байланыс деректерін жібере аламын және сұрағыңызды қолдау қызметіне жолдай аламын.",
+          "start": 2.0,
+          "end": 2.0,
+          "time_label": "00:02"
+        },
+        {
+          "n": 3,
+          "role": "bot",
+          "text": "Әңгімені жалғастыра отырып, дербес деректеріңіздің жиналуына және өңделуіне келісесіз әрі компанияның Құпиялылық саясатымен танысқаныңызды растайсыз.",
+          "start": 2.0,
+          "end": 9.0,
+          "time_label": "00:02"
+        },
+        {
+          "n": 4,
+          "role": "bot",
+          "text": "Тикерді «Котировки» бөліміндегі іздеу жолағына жазыңыз.",
+          "start": 9.0,
+          "end": 38.0,
+          "time_label": "00:09"
+        },
+        {
+          "n": 5,
+          "role": "client",
+          "text": "Операторға қосыңызшы. Іздеуді де, өтінім жіберуді де түсіндірсе екен.",
+          "start": 38.0,
+          "end": 40.0,
+          "time_label": "00:38"
+        },
+        {
+          "n": 6,
+          "role": "bot",
+          "text": "Сізді операторға қосайын ба?",
+          "start": 40.0,
+          "end": 46.0,
+          "time_label": "00:40"
+        },
+        {
+          "n": 7,
+          "role": "client",
+          "text": "Иә, қосыңызшы",
+          "start": 46.0,
+          "end": 47.0,
+          "time_label": "00:46"
+        },
+        {
+          "n": 8,
+          "role": "bot",
+          "text": "Күте тұрыңыз, оператор жақында чатқа қосылады.",
+          "start": 47.0,
+          "end": 49.0,
+          "time_label": "00:47"
+        },
+        {
+          "n": 9,
+          "role": "event",
+          "text": "Чат операторға жіберілді.",
+          "start": 49.0,
+          "end": 104.0,
+          "time_label": "00:49"
+        },
+        {
+          "n": 10,
+          "role": "operator",
+          "text": "Сәлеметсіз бе, менің атым Жанат. Қосымшадан «Котировки» бөлімі ашыңыз. Іздеу жолағына облигацияның тикерін жазыңыз.",
+          "start": 104.0,
+          "end": 127.0,
+          "time_label": "01:44"
+        },
+        {
+          "n": 11,
+          "role": "client",
+          "text": "Таптым. Енді өтінімді жіберу үшін не істеймін?",
+          "start": 127.0,
+          "end": 157.0,
+          "time_label": "02:07"
+        },
+        {
+          "n": 12,
+          "role": "operator",
+          "text": "Тикері сәйкес келетін облигацияны іздеу нәтижесінен көре аласыз.",
+          "start": 157.0,
+          "end": 171.0,
+          "time_label": "02:37"
+        },
+        {
+          "n": 13,
+          "role": "client",
+          "text": "Оны көріп тұрмын. Өтінім туралы сұрадым.",
+          "start": 171.0,
+          "end": 192.0,
+          "time_label": "02:51"
+        },
+        {
+          "n": 14,
+          "role": "operator",
+          "text": "Сұрағыңыз болса, қайта жазыңыз. Сау болыңыз!",
+          "start": 192.0,
+          "end": 195.0,
+          "time_label": "03:12"
+        }
+      ],
+      "result": {
+        "conversation_id": "p3-kz-001",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": true,
+            "rationale": "Оператор поздоровался и представился по имени в первом сообщении.",
+            "evidence_turns": [
+              10
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": null,
+            "rationale": "Клиент сразу четко описал свой вопрос о поиске облигации и отправке заявки.",
+            "evidence_turns": [
+              1,
+              5
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": null,
+            "rationale": "Вопрос носит общий информационный характер по работе с приложением, персональные данные не запрашивались.",
+            "evidence_turns": [
+              10,
+              12
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 10,
+            "rationale": "Оператор помог с поиском, но не объяснил, как именно подать заявку на покупку, пропустив вторую часть вопроса клиента.",
+            "evidence_turns": [
+              10,
+              12,
+              13
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Оператор вежлив, общение корректное, грубости или пренебрежения нет.",
+            "evidence_turns": [
+              10,
+              14
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 7,
+            "rationale": "Диалог проведен с задержками ответов оператора и неполным ответом на вопрос клиента.",
+            "evidence_turns": [
+              10,
+              12,
+              14
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": false,
+            "rationale": "Оператор попрощался, но преждевременно закрыл диалог, не решив полностью вопрос клиента.",
+            "evidence_turns": [
+              14
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": false,
+            "rationale": "Грубых нарушений, оскорблений или угроз безопасности данных в репликах оператора нет.",
+            "evidence_turns": [
+              10,
+              12,
+              14
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 70.0,
+          "critical_flag": false
+        }
+      }
+    },
+    {
+      "conversation_id": "p3-en-001",
+      "channel": "chat",
+      "language": "en",
+      "audio": null,
+      "turns": [
+        {
+          "n": 1,
+          "role": "client",
+          "text": "I'm heading to a bank branch to fund my brokerage account. Where can I download the transfer details?",
+          "start": 0.0,
+          "end": 2.0,
+          "time_label": "00:00"
+        },
+        {
+          "n": 2,
+          "role": "bot",
+          "text": "Hello! I'm AIM, the Freedom Broker AI assistant. I can answer questions about products and services, provide information about your accounts, assets and fees, compare information in a table, share your account manager's contact details, and pass your question to our support team.",
+          "start": 2.0,
+          "end": 2.0,
+          "time_label": "00:02"
+        },
+        {
+          "n": 3,
+          "role": "bot",
+          "text": "By continuing this conversation, you agree to the collection and processing of your personal data and confirm that you have read the company's Privacy Policy.",
+          "start": 2.0,
+          "end": 9.0,
+          "time_label": "00:02"
+        },
+        {
+          "n": 4,
+          "role": "bot",
+          "text": "You can download the bank transfer details in the Freedom Broker app.",
+          "start": 9.0,
+          "end": 47.0,
+          "time_label": "00:09"
+        },
+        {
+          "n": 5,
+          "role": "client",
+          "text": "Could you connect me with a support agent? I want to make sure I take the right details.",
+          "start": 47.0,
+          "end": 49.0,
+          "time_label": "00:47"
+        },
+        {
+          "n": 6,
+          "role": "bot",
+          "text": "Would you like me to connect you with an agent?",
+          "start": 49.0,
+          "end": 55.0,
+          "time_label": "00:49"
+        },
+        {
+          "n": 7,
+          "role": "client",
+          "text": "yes please",
+          "start": 55.0,
+          "end": 56.0,
+          "time_label": "00:55"
+        },
+        {
+          "n": 8,
+          "role": "bot",
+          "text": "Please wait. An agent will join the chat shortly.",
+          "start": 56.0,
+          "end": 58.0,
+          "time_label": "00:56"
+        },
+        {
+          "n": 9,
+          "role": "event",
+          "text": "Chat transferred to an agent.",
+          "start": 58.0,
+          "end": 126.0,
+          "time_label": "00:58"
+        },
+        {
+          "n": 10,
+          "role": "operator",
+          "text": "Hi, I'm Nina from Freedom Broker support. Which currency are you sending?",
+          "start": 126.0,
+          "end": 154.0,
+          "time_label": "02:06"
+        },
+        {
+          "n": 11,
+          "role": "client",
+          "text": "Euros.",
+          "start": 154.0,
+          "end": 166.0,
+          "time_label": "02:34"
+        },
+        {
+          "n": 12,
+          "role": "operator",
+          "text": "The transfer details is available in the app. Open Menu, then Add Funds, and choose the bank transfer details option.",
+          "start": 166.0,
+          "end": 185.0,
+          "time_label": "02:46"
+        },
+        {
+          "n": 13,
+          "role": "client",
+          "text": "I see a currency selector.",
+          "start": 185.0,
+          "end": 211.0,
+          "time_label": "03:05"
+        },
+        {
+          "n": 14,
+          "role": "operator",
+          "text": "Select EUR and download the details for that currency. Take them with you to the branch.",
+          "start": 211.0,
+          "end": 244.0,
+          "time_label": "03:31"
+        },
+        {
+          "n": 15,
+          "role": "client",
+          "text": "Got them. Thanks for checking.",
+          "start": 244.0,
+          "end": 261.0,
+          "time_label": "04:04"
+        },
+        {
+          "n": 16,
+          "role": "operator",
+          "text": "You're welcome. You have the EUR transfer details now. Goodbye!",
+          "start": 261.0,
+          "end": 264.0,
+          "time_label": "04:21"
+        }
+      ],
+      "result": {
+        "conversation_id": "p3-en-001",
+        "status": "ok",
+        "criteria": [
+          {
+            "criterion_id": "contact",
+            "value": true,
+            "rationale": "Оператор поздоровалась и представилась в первой же реплике.",
+            "evidence_turns": [
+              10
+            ]
+          },
+          {
+            "criterion_id": "discovery",
+            "value": true,
+            "rationale": "Оператор уточнила валюту перевода, так как реквизиты зависят от нее.",
+            "evidence_turns": [
+              10
+            ]
+          },
+          {
+            "criterion_id": "identification",
+            "value": null,
+            "rationale": "Вопрос касался общих инструкций по поиску реквизитов в приложении, персональные данные или счета не затрагивались.",
+            "evidence_turns": [
+              12
+            ]
+          },
+          {
+            "criterion_id": "consultation",
+            "value": 20,
+            "rationale": "Оператор дала верные и полные инструкции по получению реквизитов в приложении.",
+            "evidence_turns": [
+              12,
+              14
+            ]
+          },
+          {
+            "criterion_id": "empathy",
+            "value": true,
+            "rationale": "Оператор проявила вежливость и корректно ответила на все вопросы клиента.",
+            "evidence_turns": [
+              10,
+              16
+            ]
+          },
+          {
+            "criterion_id": "dialogue",
+            "value": 10,
+            "rationale": "Диалог велся грамотно, логично и без грубых нарушений.",
+            "evidence_turns": [
+              10,
+              12,
+              14,
+              16
+            ]
+          },
+          {
+            "criterion_id": "closure",
+            "value": true,
+            "rationale": "Оператор убедилась, что вопрос решен, предложила помощь и попрощалась.",
+            "evidence_turns": [
+              16
+            ]
+          },
+          {
+            "criterion_id": "critical",
+            "value": false,
+            "rationale": "Грубых нарушений, ошибок или угроз безопасности в диалоге не зафиксировано.",
+            "evidence_turns": [
+              10,
+              12,
+              14,
+              16
+            ]
+          }
+        ],
+        "score": {
+          "final_score": 100.0,
+          "critical_flag": false
+        }
+      }
+    }
+  ]
+}

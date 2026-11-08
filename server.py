@@ -151,8 +151,8 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_json({"ok": not errors, "errors": errors}, 200 if not errors else 400)
         elif path == "/api/run":
             set_name = body.get("set")
-            if set_name not in ("dev", "prod"):
-                return self.send_json({"error": "Набор должен быть dev или prod"}, 400)
+            if set_name not in ("dev", "prod", "swap"):
+                return self.send_json({"error": "Набор должен быть dev, prod или swap"}, 400)
             if job["running"]:
                 return self.send_json({"error": "Уже идёт оценка набора " + str(job["set"])}, 409)
             job.update(running=True, set=set_name, done=0, total=0, errors=0, message="Запускаю...", summary=None)
